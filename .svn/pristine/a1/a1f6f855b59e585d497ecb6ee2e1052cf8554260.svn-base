@@ -1,0 +1,13 @@
+//
+//  ResponseModel.m
+//  cnpc-mobile
+//
+//  Created by Wang ChenWei on 15/6/26.
+//
+//
+
+#import "ResponseModel.h"
+
+@implementation ResponseModel
+
+@end

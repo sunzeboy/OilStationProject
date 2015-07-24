@@ -1,0 +1,36 @@
+//
+//  CustomBtn.m
+//  cnpc-mobile
+//
+//  Created by Wang ChenWei on 15/6/25.
+//
+//
+
+#import "CustomBtn.h"
+
+@implementation CustomBtn
+-(instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+        self.titleLabel.font = [UIFont systemFontOfSize:15];
+        self.titleLabel.textColor = [UIColor blackColor];
+        self.tintColor = [UIColor blackColor];
+        self.titleLabel.tintColor = [UIColor blackColor];
+        self.titleLabel.textAlignment = NSTextAlignmentCenter;
+        [self.layer setBorderWidth:0.5];
+        [self.layer setBorderColor:[UIColor lightGrayColor].CGColor];
+        
+    }
+    return self;
+}
+-(CGRect)titleRectForContentRect:(CGRect)contentRect
+{
+    return CGRectMake(CGRectGetMaxX(self.imageView.frame), 3, contentRect.size.width*0.5, contentRect.size.height);
+}
+-(CGRect)imageRectForContentRect:(CGRect)contentRect
+{
+    return CGRectMake(5, 3, contentRect.size.width*0.5, contentRect.size.height*0.8);
+}
+
+@end

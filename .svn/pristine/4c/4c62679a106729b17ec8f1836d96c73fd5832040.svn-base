@@ -1,0 +1,20 @@
+//
+//  CusListCell.h
+//  GasStationAPP
+//
+//  Created by sunze on 15/6/18.
+//  Copyright (c) 2015年 sunze. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+@class CustomLabel;
+@interface CusListCell : UITableViewCell
+@property (weak, nonatomic) IBOutlet UIImageView *headView;
+@property (weak, nonatomic) IBOutlet UILabel *name;
+@property (weak, nonatomic) IBOutlet UILabel *dizhi;
+@property (weak, nonatomic) IBOutlet UILabel *juli;
+@property (retain, nonatomic) IBOutlet CustomLabel *price1;
+@property (retain, nonatomic) IBOutlet CustomLabel *price3;
+@property (retain, nonatomic) IBOutlet CustomLabel *price2;
+
+@end

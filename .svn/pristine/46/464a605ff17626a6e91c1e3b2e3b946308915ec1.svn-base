@@ -1,0 +1,81 @@
+//
+//  DetailsVC.m
+//  cnpc-mobile
+//
+//  Created by Wang ChenWei on 15/6/25.
+//
+//
+
+#import "DetailsVC.h"
+#import "ResponseModel.h"
+#import "CustomLabel.h"
+@interface DetailsVC ()
+
+@end
+
+@implementation DetailsVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"详情";
+    [self initDataInView];
+}
+-(void)initDataInView
+{
+    self.stationName.text = self.arrayData.stationName;
+    self.address.text = self.arrayData.address;
+    self.distance.text = [NSString stringWithFormat:@"%@千米",self.arrayData.distance];
+    self.oiltypeG92 = [[CustomLabel alloc] initWithFrame:CGRectMake(10, 135, 100, 30)];
+    self.oiltypeG95 = [[CustomLabel alloc] initWithFrame:CGRectMake(120, 135, 100, 30)];
+    self.oiltypeD0 = [[CustomLabel alloc] initWithFrame:CGRectMake(230, 135, 100, 30)];
+    [self.view addSubview:self.oiltypeD0];
+    [self.view addSubview:self.oiltypeG92];
+    [self.view addSubview:self.oiltypeG95];
+    [self.oiltypeG92 setCustomLabelWithLeftString:@"G92" RightString:self.arrayData.oilType[@"G92"]];
+    [self.oiltypeG95 setCustomLabelWithLeftString:@"G95" RightString:self.arrayData.oilType[@"G95"]];
+    [self.oiltypeD0 setCustomLabelWithLeftString:@"D0" RightString:self.arrayData.oilType[@"D0"]];
+    self.phoneNumber.text = [NSString stringWithFormat:@"☎️ 电话:  %@",self.arrayData.phoneNumber];
+    NSDictionary *serviceDic = self.arrayData.serviceFacility;
+    NSArray *arrServiceiView = @[self.serviceiView1,self.serviceiView2,self.serviceiView3,self.serviceiView4,self.serviceiView5];
+    NSDictionary *servicePicDic = @{@"freeHotWater":@"detail_drink_hot",@"supermarket":@"detail_market",@"maintain":@"detail_repair",@"restaurant":@"detail_restaurant",@"toilet":@"detail_toilet"};
+    NSArray *arr = @[@"freeHotWater",@"supermarket",@"maintain",@"restaurant",@"toilet"];
+    NSMutableArray *arrayWill = [NSMutableArray array];
+    for (int i=0; i<5; i++) {
+        BOOL *temp = [serviceDic[arr[i]] boolValue];;
+        if (temp) {
+            [arrayWill addObject:arr[i]];
+        }
+    }
+    for (int i=0; i<arrayWill.count; i++) {
+        NSString *str = arrayWill[i];
+        UIImageView *temp = arrServiceiView[i];
+        temp.image = [UIImage imageNamed:servicePicDic[str]];
+    }
+    
+}
+
+
+-(void)viewWillAppear:(BOOL)animated
+{
+    self.navigationController.navigationBar.translucent = NO;
+}
+-(void)viewWillDisappear:(BOOL)animated
+{
+    self.navigationController.navigationBar.translucent = YES;
+}
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end

@@ -1,0 +1,218 @@
+package cn.sh.changxing.ct.mobile.view.lbs;
+
+
+import android.content.Context;
+import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+import cn.sh.changxing.ct.mobile.activity.LbsActivity;
+import cn.sh.changxing.ct.mobile.activity.LbsActivity.UIFragmentType;
+import cn.sh.changxing.ct.mobile.bdmap.adapter.entity.PoiInfoEx;
+import cn.sh.changxing.ct.mobile.comm.IOperViewLayer;
+import cn.sh.changxing.ct.mobile.bdmap.adapter.BdLbsManagerAdapter;
+import cn.sh.changxing.ct.mobile.bdmap.adapter.BdNaviManagerAdapter;
+
+import com.baidu.location.BDLocation;
+import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.MyLocationData;
+import com.ionicframework.cnpcmobile317812.R;
+
+
+/**
+ * <b>Function Name：</b>MapMenuBarViewLayer class<br>
+ * <b>History：</b>2015/5/14 wangjianqing create<br>
+ * <br>
+ *
+ * @author SIS wangjianqing
+ * @version 1.0.0 2015/5/14
+ */
+public class MapMenuBarViewLayer extends LinearLayout
+		implements IOperViewLayer , OnClickListener
+{
+	// member variable
+	private Context mContext;
+	private LbsActivity mActivity;
+	private TextView mBtNavigation;
+	private TextView mBtDetails;
+	private PoiInfoEx mPoiInfoEx;
+	private BdLbsManagerAdapter mBdLbsManagerAdapter = null;
+	
+	public MapMenuBarViewLayer(Context context)
+	{
+		super(context);
+		
+		mContext = context;
+	}
+
+	public MapMenuBarViewLayer(Context context, AttributeSet attrs)
+	{
+		super(context, attrs);
+		
+		mContext = context;
+	}
+
+	public MapMenuBarViewLayer(Context context, AttributeSet attrs, int defStyle)
+	{
+		super(context, attrs, defStyle);
+		
+		mContext = context;
+	}
+	
+	private void setInterceptTouchEvent(View view)
+	{
+		view.setOnTouchListener(new OnTouchListener()
+		{
+			@Override
+			public boolean onTouch(View v, MotionEvent event)
+			{
+				// return true because of the listener has consumed the event.
+				return true;
+			}
+		});
+	}
+
+	private void getControlObjects()
+	{
+		mActivity = (LbsActivity) mContext;
+		mBtNavigation = (TextView)findViewById(R.id.tv_navigation);
+		mBtDetails = (TextView)findViewById(R.id.tv_details);
+		mBdLbsManagerAdapter = BdLbsManagerAdapter.getInstance();
+		//mMapMenuGridView = (GridView) findViewById(R.id.gv_lbs_map_menu);
+	}
+
+	private void setControlObjects()
+	{
+		// set intercept touch event of view of fragment to upper view of layout
+		setInterceptTouchEvent(this);
+		// set adapter of the map menu grid view
+		//mMapMenuGridView.setAdapter(new MapMenuGridViewAdapter(mContext));
+		// set OnItemClickListener implementation of the map menu grid view
+		
+		mBtNavigation.setOnClickListener(this);
+		mBtDetails.setOnClickListener(this);
+		 
+	}
+
+	private void showFragment(int idx)
+	{
+		 
+ 	
+	}
+
+	public void updateUI(PoiInfoEx poiInfoEx){
+		if(poiInfoEx == null ){
+			return;
+		}
+		mPoiInfoEx = poiInfoEx;
+		TextView tvName = (TextView)findViewById(R.id.tv_name);
+		TextView tvAddress = (TextView)findViewById(R.id.tv_address);
+		TextView tvDistance= (TextView)findViewById(R.id.tv_distance);
+		
+		TextView tvType92= (TextView)findViewById(R.id.tv_type_92);
+		TextView tvPrice92= (TextView)findViewById(R.id.tv_price_92);
+		
+		TextView tvType95= (TextView)findViewById(R.id.tv_type_95);
+		TextView tvPrice95= (TextView)findViewById(R.id.tv_price_95);
+		
+		TextView tvType0= (TextView)findViewById(R.id.tv_type_0);
+		TextView tvPrice0= (TextView)findViewById(R.id.tv_price_0);
+		
+		//ArrayList<OilInfoCtrl> listOilInfoCtrl = new  ArrayList<OilInfoCtrl>(3);
+		//listOilInfoCtrl.add(new OilInfoCtrl(tvType92,tvPrice92));
+		//listOilInfoCtrl.add(new OilInfoCtrl(tvType95,tvPrice95));
+		//listOilInfoCtrl.add(new OilInfoCtrl(tvType0,tvPrice0));
+		
+		//MapResultListInfoEntity data = mDatas.get(position);
+		tvName.setText(poiInfoEx.name);
+		tvAddress.setText(poiInfoEx.address);
+		double distance = (mActivity.getMapViewFragment().getDistance(poiInfoEx.location));
+		tvDistance.setText(String.valueOf(distance)+ 
+				" "+
+				mActivity.getResources().getString(R.string.lbs_kilometre));
+		
+//		ArrayList<OilInfoEntity> listOilInfo = data.getListOilInfo();
+//		for(int i=0; i<3;i++){
+//			if(i<listOilInfo.size()){
+//				String type = getTypeName(listOilInfo.get(i).getType());
+//				listOilInfoCtrl.get(i).tvType.setText(type);
+//				listOilInfoCtrl.get(i).tvPrice.setText(String.valueOf(listOilInfo.get(i).getPrice()));
+//			}else{
+//				listOilInfoCtrl.get(i).tvType.setVisibility(View.GONE);
+//				listOilInfoCtrl.get(i).tvPrice.setVisibility(View.GONE);	
+//			}
+//		}
+		 
+		
+	}
+	
+	@Override
+	public void initComponent()
+	{
+		getControlObjects();
+		setControlObjects();
+	}
+
+	@Override
+	public boolean isHiding()
+	{
+		return (getVisibility() != View.VISIBLE);
+	}
+
+	@Override
+	public void appearSelf()
+	{
+		setVisibility(View.VISIBLE);
+	}
+
+	@Override
+	public void hideSelf()
+	{
+		setVisibility(View.GONE);
+	}
+
+	@Override
+	public void dispose()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch(v.getId()){
+		case R.id.tv_navigation:
+			navigation();
+			break;
+		case R.id.tv_details:
+			mActivity.showUIFragment(UIFragmentType.TYPE_GAS_STATION_DETAILED_INFO, 
+					UIFragmentType.TYPE_GAS_STATION_DETAILED_INFO.toString(), 
+					true);
+			break;
+		}
+		
+	}
+	
+	private void navigation(){
+		
+		BaiduMap baiduMap = mActivity.getMapViewFragment().getBaiduMap();
+		   if(null==baiduMap.getLocationData()){
+		     return;
+		   }
+		  BdNaviManagerAdapter.getInstance().launchDefaultNavigator(mActivity, baiduMap.getLocationData(), mPoiInfoEx);		
+	}
+	
+	class OilInfoCtrl{
+    	TextView tvType;
+    	TextView tvPrice;
+    	public OilInfoCtrl(TextView type ,TextView price){
+    		tvType = type;
+    		tvPrice =price;
+    	}
+    }	
+	
+	
+}

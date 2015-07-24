@@ -1,0 +1,14 @@
+package cn.sh.changxing.ct.mobile.comm;
+
+import android.app.Fragment.SavedState;
+import android.os.Bundle;
+
+public final class FragmentExData
+{
+	public FragmentEx fragment;
+	public Bundle arguments;
+	public SavedState savedState;
+	public String tag;
+	public int containerId;
+	public boolean isFinishActivityOnCloseFragment;
+}

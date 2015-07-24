@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:state_pressed="true"
+        android:color="@color/lbs_image_label_btn_text_press_color" />
+    <item
+        android:state_selected="true"
+        android:color="@color/lbs_image_label_btn_text_press_color" />
+    <item
+        android:state_enabled="false"
+        android:color="@color/gray" />
+    <item
+        android:color="@color/lbs_image_label_btn_text_color" />
+</selector>

@@ -1,0 +1,34 @@
+//
+//  TopDownBtn.m
+//  GasStationAPP
+//
+//  Created by sunze on 15/6/16.
+//  Copyright (c) 2015年 sunze. All rights reserved.
+//
+
+#import "TopDownBtn.h"
+
+@implementation TopDownBtn
+- (id)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.imageView.contentMode=UIViewContentModeScaleAspectFit;
+        self.titleLabel.font=[UIFont systemFontOfSize:15];
+        self.titleLabel.textAlignment=NSTextAlignmentCenter;
+        [self setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [self setTitleColor:[UIColor greenColor] forState:UIControlStateSelected];
+    }
+    return self;
+}
+
+- (CGRect)titleRectForContentRect:(CGRect)contentRect
+{
+    return CGRectMake(5, CGRectGetMaxY(self.imageView.frame)+10, contentRect.size.width*0.8, contentRect.size.height*0.4);
+}
+- (CGRect)imageRectForContentRect:(CGRect)contentRect
+{
+    return CGRectMake(5, 15, contentRect.size.width*0.8, contentRect.size.height*0.6);
+}
+
+@end

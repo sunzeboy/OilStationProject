@@ -1,0 +1,13 @@
+//
+//  CustomBtn.h
+//  cnpc-mobile
+//
+//  Created by Wang ChenWei on 15/6/25.
+//
+//
+
+#import <UIKit/UIKit.h>
+
+@interface CustomBtn : UIButton
+
+@end

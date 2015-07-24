@@ -1,0 +1,64 @@
+//
+//  OilTypeVC.m
+//  cnpc-mobile
+//
+//  Created by Wang ChenWei on 15/6/24.
+//
+//
+
+#import "OilTypeVC.h"
+#import "CustomTypeCell.h"
+@interface OilTypeVC ()
+<UITableViewDataSource,
+UITableViewDelegate>
+@property (retain,nonatomic) UITableView *tableView;
+
+@end
+
+@implementation OilTypeVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"选择型号";
+    self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+    self.tableView.delegate = self;
+    self.tableView.dataSource = self;
+    [self.view addSubview:self.tableView];
+    [self setExtraCellLineHidden:self.tableView];
+    
+}
+
+-(void)setExtraCellLineHidden:(UITableView*)tableView
+{
+    UIView *view = [UIView new];
+    view.backgroundColor = [UIColor clearColor];
+    [tableView setTableFooterView:view];
+}
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - Table view data source
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    // Return the number of rows in the section.
+    return 3;
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 80;
+}
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    NSArray *arrayTitle = @[@"93#(京92)",@"97#(京95)",@"0#柴油"];
+    CustomTypeCell *cell=[[[NSBundle mainBundle] loadNibNamed:@"CustomTypeCell" owner:self options:nil] objectAtIndex:0];
+    cell.typeLabel.text = arrayTitle[indexPath.row];
+    return cell;
+}
+
+@end

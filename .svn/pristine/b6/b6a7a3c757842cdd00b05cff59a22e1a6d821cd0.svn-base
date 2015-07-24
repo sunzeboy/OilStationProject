@@ -1,0 +1,134 @@
+package cn.sh.changxing.ct.mobile.fragment.lbs;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.ImageButton;
+import cn.sh.changxing.ct.mobile.activity.LbsActivity;
+import cn.sh.changxing.ct.mobile.activity.LbsActivity.UIFragmentType;
+import cn.sh.changxing.ct.mobile.comm.FragmentEx;
+import cn.sh.changxing.ct.mobile.preference.LbsSharedPreferenceSettings;
+import com.ionicframework.cnpcmobile317812.R;
+
+public class MapSettingFragment extends FragmentEx implements OnClickListener
+		 
+{
+	
+	private ImageButton mBtnBack;
+	private CheckBox mCbOilType92;
+	private CheckBox mCbOilType95;
+	private CheckBox mCbOilType0;
+
+
+	public MapSettingFragment()
+	{
+
+	}
+
+	private void getControlObjects()
+	{
+		mBtnBack = (ImageButton) mActivity
+				.findViewById(R.id.btn_lbs_back);
+		mCbOilType92 = (CheckBox) mActivity
+				.findViewById(R.id.cb_settings_oli_type_92);
+		mCbOilType95 = (CheckBox) mActivity
+				.findViewById(R.id.cb_settings_oli_type_95);
+		mCbOilType0 = (CheckBox) mActivity
+				.findViewById(R.id.cb_settings_oli_type_0);
+		
+		mCbOilType92.setChecked(LbsSharedPreferenceSettings.
+				getInstance(mActivity).getLbsSettingsOilType92());
+		mCbOilType95.setChecked(LbsSharedPreferenceSettings.
+				getInstance(mActivity).getLbsSettingsOilType95());
+		mCbOilType0.setChecked(LbsSharedPreferenceSettings.
+				getInstance(mActivity).getLbsSettingsOilType0());
+	}
+
+	private void setControlObjects()
+	{
+		mBtnBack.setOnClickListener(this);
+		mCbOilType92.setOnClickListener(this);
+		mCbOilType95.setOnClickListener(this);
+		mCbOilType0.setOnClickListener(this);
+	}
+
+	private void showFragment(UIFragmentType fragmentType)
+	{
+		((LbsActivity) mActivity).showUIFragment(fragmentType, fragmentType.toString(), true);
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+
+		
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState)
+	{
+		View view = inflater.inflate(R.layout.fragment_lbs_map_setting,
+				container, false);
+		setInterceptTouchEvent(view);
+		return view;
+	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState)
+	{
+		super.onActivityCreated(savedInstanceState);
+		getControlObjects();
+		setControlObjects();
+	}
+
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+	}
+
+	@Override
+	public void onPause()
+	{
+		super.onPause();
+	}
+
+	@Override
+	public void onDestroy()
+	{
+		super.onDestroy();
+	}
+
+	 
+
+	@Override
+	public void onClick(View v)
+	{
+		switch (v.getId())
+		{
+		case R.id.btn_lbs_back:
+			mActivity.closePopFragmentOnTop();
+			break;
+		case R.id.cb_settings_oli_type_92:
+			LbsSharedPreferenceSettings.
+			getInstance(mActivity).setLbsSettingsOilType92(mCbOilType92.isChecked());
+			break;
+		case R.id.cb_settings_oli_type_95:
+			LbsSharedPreferenceSettings.
+			getInstance(mActivity).setLbsSettingsOilType95(mCbOilType95.isChecked());
+			break;
+		case R.id.cb_settings_oli_type_0:
+			LbsSharedPreferenceSettings.
+			getInstance(mActivity).setLbsSettingsOilType0(mCbOilType0.isChecked());
+			break;	
+		default:
+			break;
+		}
+	}
+
+}

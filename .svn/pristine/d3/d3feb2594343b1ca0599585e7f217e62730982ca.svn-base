@@ -1,0 +1,28 @@
+//
+//  DetailsVC.h
+//  cnpc-mobile
+//
+//  Created by Wang ChenWei on 15/6/25.
+//
+//
+
+#import <UIKit/UIKit.h>
+#import "ResponseModel.h"
+@class CustomLabel;
+@interface DetailsVC : UIViewController
+@property (retain,nonatomic) ResponseModel *arrayData;
+
+@property (weak, nonatomic) IBOutlet UILabel *stationName;
+@property (weak, nonatomic) IBOutlet UILabel *address;
+@property (retain, nonatomic) IBOutlet CustomLabel *oiltypeG92;
+@property (retain, nonatomic) IBOutlet CustomLabel *oiltypeG95;
+@property (retain, nonatomic) IBOutlet CustomLabel *oiltypeD0;
+@property (weak, nonatomic) IBOutlet UILabel *distance;
+@property (weak, nonatomic) IBOutlet UILabel *phoneNumber;
+@property (weak, nonatomic) IBOutlet UIImageView *serviceiView1;
+@property (weak, nonatomic) IBOutlet UIImageView *serviceiView2;
+@property (weak, nonatomic) IBOutlet UIImageView *serviceiView3;
+@property (weak, nonatomic) IBOutlet UIImageView *serviceiView4;
+@property (weak, nonatomic) IBOutlet UIImageView *serviceiView5;
+
+@end

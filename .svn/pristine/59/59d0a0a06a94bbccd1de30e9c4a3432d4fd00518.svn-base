@@ -1,0 +1,21 @@
+<style type="text/css">
+.modal {
+    display: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+iframe {
+    width: 100%;
+}
+</style>
+<ion-modal-view>
+    <ion-header-bar class="bar-assertive">
+        <div class="button button-icon icon ion-ios-close-empty" ng-click="onClosePopupWindow()"></div>
+    </ion-header-bar>
+    <ion-content overflow-scroll='true'>
+            <iframe ng-src="{{url}}" onload="adjustFrameToParentNode(this)"></iframe>
+    </ion-content>
+</ion-modal-view>

@@ -1,0 +1,13 @@
+//
+//  CustomPointAnnotation.m
+//  cnpc-mobile
+//
+//  Created by Wang ChenWei on 15/6/24.
+//
+//
+
+#import "CustomPointAnnotation.h"
+
+@implementation CustomPointAnnotation
+
+@end

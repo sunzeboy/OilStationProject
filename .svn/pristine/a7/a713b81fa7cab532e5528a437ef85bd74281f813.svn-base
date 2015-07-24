@@ -1,0 +1,15 @@
+//
+//  CustomPointAnnotation.h
+//  cnpc-mobile
+//
+//  Created by Wang ChenWei on 15/6/24.
+//
+//
+
+#import <BaiduMapAPI/BMapKit.h>
+
+
+@interface CustomPointAnnotation : BMKPointAnnotation
+@property (copy,nonatomic) NSString *grade;
+
+@end

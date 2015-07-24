@@ -1,0 +1,111 @@
+package cn.sh.changxing.ct.mobile.props;
+
+import java.io.File;
+
+import android.content.Context;
+import android.os.Environment;
+//import cn.sh.changxing.ct.mobile.utils.FileUtils;
+
+public class EnvInfo {
+	// static variable
+	private static EnvInfo mEnvInfoInst;
+
+	// constant definition
+	protected final static String BAIDU_PLACE_SEARCH_WEB_API_AK = "B0d5eec72d053f9e6594dee501bbb021";
+	protected final static String POI_NAME_REMIND_HOTWORDS_WEB_API_URL = "http://api.map.baidu.com/place/v2/suggestion?";
+
+	// member variable
+	private Context mAppContext;
+	private volatile boolean mIsUsingSqlLiteDbFileNonProtectedFolderPath;
+	private String mSqlLiteDbFileNonProtectedFolderPath;
+	private String mBaiduPlaceSearchWebApiAk;
+	private String mPoiNameRemindHotwordsWebApiURL;
+	private String mBasePath;
+	private String mMusicPath;
+	private String mMusicCachePath;
+	private String mMusicDataPath;
+
+	// constructor
+	private EnvInfo() {
+		mIsUsingSqlLiteDbFileNonProtectedFolderPath = false;
+		mBaiduPlaceSearchWebApiAk = BAIDU_PLACE_SEARCH_WEB_API_AK;
+		mPoiNameRemindHotwordsWebApiURL = POI_NAME_REMIND_HOTWORDS_WEB_API_URL;
+		//initFolder();
+	}
+
+	public synchronized static EnvInfo getInstance() {
+		try {
+			if (mEnvInfoInst == null) {
+				mEnvInfoInst = new EnvInfo();
+			}
+		} catch (Exception ex) {
+			System.err.println("Exception:" + ex.getMessage());
+			ex.printStackTrace();
+		}
+
+		return mEnvInfoInst;
+	}
+
+	public Context getAppContext() {
+		return mAppContext;
+	}
+
+	public void setAppContext(Context appContext) {
+		mAppContext = appContext;
+	}
+
+	public boolean isUsingSqlLiteDbFilePath() {
+		return mIsUsingSqlLiteDbFileNonProtectedFolderPath;
+	}
+
+	public String getSqlLiteDbFilePath() {
+		return mSqlLiteDbFileNonProtectedFolderPath;
+	}
+
+	public String getBaiduPlaceSearchWebApiAk() {
+		return mBaiduPlaceSearchWebApiAk;
+	}
+
+	public String getPoiNameRemindHotwordsWebApiURL() {
+		return mPoiNameRemindHotwordsWebApiURL;
+	}
+
+	public static boolean checkSDCard() {
+		if (android.os.Environment.getExternalStorageState().equals(
+				android.os.Environment.MEDIA_MOUNTED)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+//	private void initFolder() {
+//		if (checkSDCard()) {
+//			mBasePath = Environment.getExternalStorageDirectory()
+//					.getAbsolutePath();
+//			mMusicPath = mBasePath + File.separator + "music";
+//			mMusicCachePath = mMusicPath + File.separator + "cahce";
+//			mMusicDataPath = mMusicPath + File.separator + "data";
+//		} else {
+//			mBasePath = getAppContext().getCacheDir().getAbsolutePath();
+//			mMusicPath = mBasePath + File.separator + "music";
+//			mMusicCachePath = mMusicPath + File.separator + "cahce";
+//		}
+//		FileUtils.createFolder(mMusicPath, false);
+//		FileUtils.createFolder(mMusicCachePath, false);
+//		FileUtils.createFolder(mMusicDataPath, false);
+//	}
+
+	public String getmMusicPath() {
+		return mMusicPath;
+	}
+
+	public String getmMusicCachePath() {
+		return mMusicCachePath;
+	}
+
+	public String getmMusicDataPath() {
+		return mMusicDataPath;
+	}
+
+}

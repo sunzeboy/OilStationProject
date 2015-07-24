@@ -1,0 +1,235 @@
+package cn.sh.changxing.ct.mobile.preference.adapter;
+
+import android.content.Context;
+import cn.sh.changxing.ct.mobile.preference.SharedPreferenceHelper;
+
+/**
+ * <b>Function Name：</b>注册通用的SharePreference适配器<br>
+ * <b>History：</b>2015/04/10 刘缜谦 create<br>
+ * <br>
+ * 
+ * @author SIS 刘缜谦
+ * @version 1.0.0 2015/04/10
+ */
+public class LoginDataAdapter{
+	
+	private SharedPreferenceHelper mSharedPreferenceHelper;
+	/** 创建的文件名 */
+	private final static String LOGIN_SHARE_PREF_FILE_NAME = "Login";
+	/** 手势识别轨迹内容 */
+	private final static String KEY_LOCK_PWD = "lock_pwd";
+	/** 手势密码 */
+	private final static String KEY_GESTURE_PASSWORD = "gesture_password";
+	/** 手势轨迹 */
+	private final static String KEY_GESTURE_TRAIL = "gesture_trail";
+	
+	/**
+	 * 构造函数
+	 * @param context 上下文
+	 */
+	public LoginDataAdapter(Context context)
+	{
+		mSharedPreferenceHelper = new SharedPreferenceHelper(context,LOGIN_SHARE_PREF_FILE_NAME);
+	}
+	
+	/**
+	 * 设置用户登录信息
+	 * @param userName 用户名
+	 * @param accessToken 登录Token
+	 * @param accountStatus 登录状态
+	 * @param lastloginTime 最后登录时间
+	 */
+	public void setAccountData(String userName,String accessToken,String accountStatus,
+								String lastloginTime)
+	{
+		mSharedPreferenceHelper.setStringValue("UserName", userName);
+		mSharedPreferenceHelper.setStringValue("AccessToken", accessToken);
+		mSharedPreferenceHelper.setStringValue("AccountStatus", accountStatus);
+		mSharedPreferenceHelper.setStringValue("LastloginTime", lastloginTime);
+	}
+	
+	/**
+	 * 清除用户登录信息
+	 */
+	public void removeAccountData()
+	{
+		mSharedPreferenceHelper.removeData("AccessToken");
+		mSharedPreferenceHelper.removeData("AccountStatus");
+		mSharedPreferenceHelper.removeData("LastloginTime");
+//		mSharedPreferenceHelper.removeData(KEY_GESTURE_PASSWORD);
+//		mSharedPreferenceHelper.removeData(KEY_GESTURE_TRAIL);
+	}
+	
+	public String getAccountPhone()
+	{
+		String result = mSharedPreferenceHelper.getStringValue("AccountPhone", "");
+		return result;
+	}
+	
+	public void setAccountPhone(String phone)
+	{
+		mSharedPreferenceHelper.setStringValue("AccountPhone", phone);
+	}
+		
+	/**
+	 * 设置昵称
+	 * @param nickname 昵称
+	 */
+	public void setAccountNickName(String nickname)
+	{
+		mSharedPreferenceHelper.setStringValue("UserNickName",nickname);
+	}
+	
+	/**
+	 * 设置性别
+	 * @param gender 性别
+	 */
+	public void setAccountGender(String gender)
+	{
+		mSharedPreferenceHelper.setStringValue("UserGender", gender);
+	}
+	
+	/**
+	 * 清除用户信息
+	 */
+	public void removeAccountInfo()
+	{
+		mSharedPreferenceHelper.removeData("UserNickName");
+		mSharedPreferenceHelper.removeData("UserGender");
+		mSharedPreferenceHelper.removeData("AccountPhone");
+	}
+	
+	/**
+	 * 设置头像文件标志位
+	 * @param headPic 头像文件
+	 */
+	public void setAccountHeadPic(boolean headPic)
+	{
+		mSharedPreferenceHelper.setBooleanValue("UserHeadPic", headPic);
+	}
+	
+	/**
+	 * 取得头像文件标志位
+	 */
+	public Boolean getAccountHeadPic()
+	{
+		boolean result = mSharedPreferenceHelper.getBooleanValue("UserHeadPic", false);
+		return result;
+	}
+	
+	/**
+	 * 取得用户昵称
+	 */
+	public String getAccountNickName()
+	{
+		String result = mSharedPreferenceHelper.getStringValue("UserNickName", "");
+		return result;
+	}
+	
+	/**
+	 * 取得用户昵称
+	 */
+	public String getAccountGender()
+	{
+		String result = mSharedPreferenceHelper.getStringValue("UserGender", "");
+		return result;
+	}
+	
+	/**
+	 * 清除文件所有内容
+	 */
+	public void clearAccountData()
+	{
+		mSharedPreferenceHelper.clearData();
+	}
+	
+	/**
+	 * 设置手势密码
+	 * @param gesturePassword 手势密码
+	 */
+	public void setGesturePassword(boolean gesturePassword)
+	{
+		mSharedPreferenceHelper.setBooleanValue(KEY_GESTURE_PASSWORD, gesturePassword);
+	}
+	
+	/**
+	 * 取得手势密码状态
+	 */
+	public Boolean getGesturePassword()
+	{
+		boolean result = mSharedPreferenceHelper.getBooleanValue(KEY_GESTURE_PASSWORD, false);
+		return result;
+	}
+	
+	/**
+	 * 设置手势轨迹
+	 * @param gestureTrail 手势轨迹
+	 */
+	public void setGestureTrail(boolean gestureTrail)
+	{
+		mSharedPreferenceHelper.setBooleanValue(KEY_GESTURE_TRAIL, gestureTrail);
+	}
+	
+	/**
+	 * 取得手势轨迹
+	 */
+	public Boolean getGestureTrail()
+	{
+		boolean result = mSharedPreferenceHelper.getBooleanValue(KEY_GESTURE_TRAIL,false);
+		return result;
+	}
+	
+	/**
+	 * 设置手势滑动轨迹
+	 * @param lockPatterString 滑动轨迹
+	 */
+	public void setLockPatterString(String lockPatterString)
+	{
+		mSharedPreferenceHelper.setStringValue(KEY_LOCK_PWD, lockPatterString);
+	}
+
+	/**
+	 * 取得登录用户名信息
+	 */
+	public String getAccountUserName()
+	{
+		String result = mSharedPreferenceHelper.getStringValue("UserName", "");
+		return result;
+	}
+	
+	/**
+	 * 取得用户登录Token
+	 */
+	public String getAccountToken()
+	{
+		String result = mSharedPreferenceHelper.getStringValue("AccessToken", "");
+		return result;
+	}
+	
+	/**
+	 * 取得用户登录状态
+	 */
+	public String getAccountStatus()
+	{
+		String result = mSharedPreferenceHelper.getStringValue("AccountStatus", "");
+		return result;
+	}
+	
+	/**
+	 * 取得用户最后登录时间
+	 */
+	public String getAccountLastloginTime()
+	{
+		String result = mSharedPreferenceHelper.getStringValue("LastloginTime", "");
+		return result;
+	}
+	
+	/**
+	 * 取得是否密码锁
+	 */
+	public String getLockPatterString()
+	{
+		String result = mSharedPreferenceHelper.getStringValue(KEY_LOCK_PWD, "");
+		return result;
+	}
+}

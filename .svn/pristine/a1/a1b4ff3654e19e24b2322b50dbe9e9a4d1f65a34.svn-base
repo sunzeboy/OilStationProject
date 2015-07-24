@@ -1,0 +1,47 @@
+package cn.sh.changxing.ct.mobile.logic.lbs.entity;
+
+import java.util.ArrayList;
+ 
+public class MapResultListInfoEntity{
+	// 加油站名称
+	private String mName;
+	// 地址
+	private String mAddress;
+	// 距离
+	private double mDistance;  
+	// 汽油信息
+	private ArrayList<OilInfoEntity> mListOilInfo;
+	
+	
+	
+	public void setName(String value){
+		mName = value;
+	}
+	public String getName(){
+		return mName;
+	}
+	
+	public void setAddress(String value){
+		mAddress = value;
+	}
+	
+	public String getAddress(){
+		return mAddress;
+	}
+	
+	public void setDistance(double value){
+		mDistance = value;
+	}
+	
+	public double getDistance(){
+		return mDistance;
+	}
+	
+	public void setListOilInfo(ArrayList<OilInfoEntity> value){
+		mListOilInfo = value;
+	}
+	
+	public ArrayList<OilInfoEntity> getListOilInfo(){
+		return mListOilInfo;
+	}
+}

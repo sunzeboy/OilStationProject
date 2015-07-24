@@ -1,0 +1,482 @@
+package cn.sh.changxing.ct.mobile.view.lbs;
+
+import android.content.Context;
+import android.graphics.Point;
+import android.util.AttributeSet;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.MapStatus;
+import com.baidu.mapapi.map.MapStatusUpdateFactory;
+import com.baidu.mapapi.map.BaiduMap.OnMapStatusChangeListener;
+import com.baidu.mapapi.map.MyLocationConfiguration.LocationMode;
+import cn.sh.changxing.ct.mobile.activity.LbsActivity;
+import cn.sh.changxing.ct.mobile.bdmap.adapter.BdLbsManagerAdapter;
+import cn.sh.changxing.ct.mobile.bdmap.adapter.BdLbsManagerAdapter.LbsManagerListener;
+import cn.sh.changxing.ct.mobile.comm.IOperViewLayer;
+import cn.sh.changxing.ct.mobile.preference.adapter.LbsDataAdapter;
+import cn.sh.changxing.ct.mobile.preference.adapter.LbsDataAdapter.OnDataSetListener;
+import com.ionicframework.cnpcmobile317812.R;
+
+
+/**
+ * 
+ * @ClassName: MapOperViewLayer
+ * @Description:  地图控制view
+ * @author caiyingshui 
+ * @date 2015年4月7日 下午1:39:16 
+ *
+ */
+public class MapOperViewLayer extends RelativeLayout
+		implements IOperViewLayer, OnClickListener, OnCheckedChangeListener
+{
+	// constant definition
+	private final static float SCALE_VIEW_MARGIN_LEFT = 10;
+	
+	// member variable
+	// 地图操作相关
+	private BdLbsManagerAdapter mBdLbsManagerAdapter;
+	private LbsManagerListenerImpl mLbsManagerListenerImpl;
+	// UI操作相关
+	private Context mContext;	
+	private LbsActivity mActivity;
+	private TextView mTxtSwitchTrafficEnabledFlag;
+	//private TextView mTxtDisplaySetting; wy
+	//private ImageButton mImgBtnMyCar;wy
+	//private boolean mIsPermitMyCarBtnVisible;
+	private ImageButton mImgBtnZoomIn;
+	private ImageButton mImgBtnZoomOut;
+	private ImageButton mBtnLocMode;
+	private BaiduMap mBaiduMap;
+	private float mMaxZoomLevel;
+	private float mMinZoomLevel;
+	// 数据存储相关
+	private LbsDataAdapter mLbsDataAdapter;
+	private OnDataSetListenerImpl mOnDataSetListenerImpl;
+	
+	private OnClickListener mBtnZoomClickListener = new OnClickListener()
+	{
+
+		@Override
+		public void onClick(View v)
+		{
+			MapStatus mapStatus = mBaiduMap.getMapStatus();
+			switch (v.getId())
+			{
+			case R.id.btn_map_oper_zoom_in:
+				mBaiduMap.animateMapStatus(MapStatusUpdateFactory
+						.zoomTo(mapStatus.zoom + 1));
+				break;
+			case R.id.btn_map_oper_zoom_out:
+				mBaiduMap.animateMapStatus(MapStatusUpdateFactory
+						.zoomTo(mapStatus.zoom - 1));
+				break;
+			default:
+				break;
+			}
+
+		}
+	};
+	
+	private OnMapStatusChangeListener mOnMapStatusChangeListener = new OnMapStatusChangeListener()
+	{
+
+		@Override
+		public void onMapStatusChangeStart(MapStatus arg0)
+		{
+
+		}
+
+		@Override
+		public void onMapStatusChangeFinish(MapStatus arg0)
+		{
+			controlZoomShow();
+		}
+
+		@Override
+		public void onMapStatusChange(MapStatus arg0)
+		{
+
+		}
+	};
+	
+	public MapOperViewLayer(Context context)
+	{
+		super(context);
+
+		initMemberData(context);
+	}
+
+	public MapOperViewLayer(Context context, AttributeSet attrs)
+	{
+		super(context, attrs);
+
+		initMemberData(context);
+	}
+
+	public MapOperViewLayer(Context context, AttributeSet attrs, int defStyle)
+	{
+		super(context, attrs, defStyle);
+		
+		initMemberData(context);
+	}
+	
+	private void initMemberData(Context context)
+	{
+		mContext = context;
+		mBdLbsManagerAdapter = BdLbsManagerAdapter.getInstance();
+		mLbsManagerListenerImpl = new LbsManagerListenerImpl();
+		mLbsDataAdapter = new LbsDataAdapter(mContext);
+		//setIsPermitMyCarBtnVisible(false);
+		mOnDataSetListenerImpl = new OnDataSetListenerImpl();
+	}
+
+	private void getControlObjects()
+	{
+		mTxtSwitchTrafficEnabledFlag = (TextView) findViewById(R.id.txt_map_oper_switch_traffic_enabled_flag);
+		//mTxtDisplaySetting = (TextView) findViewById(R.id.txt_map_oper_display_setting);
+		//mImgBtnMyCar = (ImageButton) findViewById(R.id.btn_map_oper_my_car);
+		mImgBtnZoomIn = (ImageButton) findViewById(R.id.btn_map_oper_zoom_in);
+		mImgBtnZoomOut = (ImageButton) findViewById(R.id.btn_map_oper_zoom_out);
+		mBtnLocMode = (ImageButton) findViewById(R.id.btn_map_oper_my_location);
+	}
+	
+	private void setControlObjects()
+	{
+		mBdLbsManagerAdapter.addLbsManagerListener(mLbsManagerListenerImpl);
+		mTxtSwitchTrafficEnabledFlag.setOnClickListener(this);
+		//mTxtDisplaySetting.setOnClickListener(this);
+		//mImgBtnMyCar.setOnClickListener(this);
+		mBtnLocMode.setOnClickListener(this);
+		mImgBtnZoomIn.setOnClickListener(mBtnZoomClickListener);
+		mImgBtnZoomOut.setOnClickListener(mBtnZoomClickListener);
+		mLbsDataAdapter.addOnDataSetListener(mOnDataSetListenerImpl);
+		//setupImgBtnMyCarControlState();
+		setupBtnLocModeControlState();
+		setupSwitchTrafficEnabledControlState();
+	}
+	
+//	private void setupImgBtnMyCarControlState()
+//	{
+//		if (mImgBtnMyCar == null)
+//		{
+//			return;
+//		}
+//		
+//		if (isPermitMyCarBtnVisible())
+//		{
+//			// setup my car image button's visibility attribute
+//			if (!mLbsDataAdapter.getMyCarSwitchFlag())
+//			{
+//				mImgBtnMyCar.setVisibility(View.GONE);
+//			}
+//			else
+//			{
+//				mImgBtnMyCar.setVisibility(View.VISIBLE);
+//			}
+//		}
+//		else
+//		{
+//			mImgBtnMyCar.setVisibility(View.GONE);
+//		}
+//	}
+	
+//	private void setupImgBtnMyCarControlState(boolean setFlag)
+//	{
+//		if (mImgBtnMyCar == null)
+//		{
+//			return;
+//		}
+//		
+//		if (isPermitMyCarBtnVisible())
+//		{
+//			// setup my car image button's visibility attribute
+//			if (!setFlag)
+//			{
+//				mImgBtnMyCar.setVisibility(View.GONE);
+//			}
+//			else
+//			{
+//				mImgBtnMyCar.setVisibility(View.VISIBLE);
+//			}
+//		}
+//		else
+//		{
+//			mImgBtnMyCar.setVisibility(View.GONE);
+//		}
+//	}
+	
+	private void setupBtnLocModeControlState()
+	{
+		// setup location mode button's background resource id
+//		if (!mBdLbsManagerAdapter.isCCPOnMapCenter())
+//		{
+//			mBtnLocMode.setBackgroundResource(R.drawable.selector_btn_lbs_map_return_ccp);
+//		}
+//		else 
+		if (mBdLbsManagerAdapter.getCurrLocationMode() == LocationMode.NORMAL)
+		{
+			mBtnLocMode.setBackgroundResource(R.drawable.selector_btn_lbs_map_north_up);
+		}
+		else // if (mBdLbsManagerAdapter.getCurrLocationMode() == LocationMode.COMPASS)
+		{
+			mBtnLocMode.setBackgroundResource(R.drawable.selector_btn_lbs_map_head_up);
+		}
+	}
+	
+	private void setupSwitchTrafficEnabledControlState()
+	{
+		// setup switch traffic enabled flag control's background resource id
+		if (!mLbsDataAdapter.getLbsMapTrafficEnabledFlg())
+		{
+			mTxtSwitchTrafficEnabledFlag.setBackgroundResource(R.drawable.selector_btn_lbs_map_road_traffic_info_off);
+		}
+		else
+		{
+			mTxtSwitchTrafficEnabledFlag.setBackgroundResource(R.drawable.selector_btn_lbs_map_road_traffic_info_on);
+		}
+	}
+	
+	private void controlZoomShow()
+	{
+		// 获取当前地图状态
+		float zoom = mBaiduMap.getMapStatus().zoom;
+		// 如果当前状态大于等于地图的最大状态，则放大按钮则失效
+		if (zoom >= mMaxZoomLevel)
+		{
+			mImgBtnZoomIn.setEnabled(false);
+			mImgBtnZoomOut.setEnabled(true);
+		}
+		else
+		{
+			mImgBtnZoomIn.setEnabled(true);
+		}
+		// 如果当前状态小于等于地图的最小状态，则缩小按钮失效
+		if (zoom <= mMinZoomLevel)
+		{
+			mImgBtnZoomOut.setEnabled(false);
+			mImgBtnZoomIn.setEnabled(true);
+		}
+		else
+		{
+			mImgBtnZoomOut.setEnabled(true);
+		}
+	}
+	
+	private void initBaiduMapStatus()
+	{
+		mBaiduMap = mActivity.getMapViewFragment().getBaiduMap();
+		mBaiduMap.setOnMapStatusChangeListener(mOnMapStatusChangeListener);
+		mMaxZoomLevel = mBaiduMap.getMaxZoomLevel();
+		mMinZoomLevel = mBaiduMap.getMinZoomLevel();
+		// initialize lbs map traffic enabled state
+		if (mLbsDataAdapter.getLbsMapTrafficEnabledFlg())
+		{
+			if (!mBaiduMap.isTrafficEnabled())
+			{
+				mBaiduMap.setTrafficEnabled(true);
+			}
+		}
+		else
+		{
+			if (mBaiduMap.isTrafficEnabled())
+			{
+				mBaiduMap.setTrafficEnabled(false);
+			}
+		}
+	}
+	
+	@Override
+	protected void onLayout(boolean changed, int l, int t, int r, int b)
+	{
+		super.onLayout(changed, l, t, r, b);
+		setScaleViewLayout();
+	}
+	
+	@Override
+	public void initComponent()
+	{
+		mActivity = (LbsActivity) mContext;
+		
+		initBaiduMapStatus();
+		getControlObjects();
+		setControlObjects();
+	}
+
+	@Override
+	public boolean isHiding()
+	{
+		return (getVisibility() != View.VISIBLE);
+	}
+
+	@Override
+	public void appearSelf()
+	{
+		//setupImgBtnMyCarControlState();
+		setupBtnLocModeControlState();
+		setupSwitchTrafficEnabledControlState();
+		
+		setVisibility(View.VISIBLE);
+		
+		setScaleViewLayout();
+	}
+
+	@Override
+	public void hideSelf()
+	{
+		setVisibility(View.GONE);
+	}
+
+	@Override
+	public void dispose()
+	{
+		try
+		{
+			mBdLbsManagerAdapter.removeLbsManagerListener(mLbsManagerListenerImpl);
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		
+		try
+		{
+			mLbsDataAdapter.removeOnDataSetListener(mOnDataSetListenerImpl);
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+
+	@Override
+	public void onClick(View v)
+	{
+		switch (v.getId())
+		{
+		case R.id.txt_map_oper_switch_traffic_enabled_flag:
+			// call setup switch traffic enabled control state
+			if (!mLbsDataAdapter.getLbsMapTrafficEnabledFlg())
+			{
+				mBdLbsManagerAdapter.setTrafficEnabledFlag(mBaiduMap, true);
+				mLbsDataAdapter.setLbsMapTrafficEnabledFlg(true);
+			}
+			else
+			{
+				mBdLbsManagerAdapter.setTrafficEnabledFlag(mBaiduMap, false);
+				mLbsDataAdapter.setLbsMapTrafficEnabledFlg(false);
+			}
+			setupSwitchTrafficEnabledControlState();
+			break;
+		
+//		case R.id.txt_map_oper_display_setting:
+//			// call show or close map display set UI fragment process
+//			int viewTop = getTop() + mTxtDisplaySetting.getTop();
+//			if (!mActivity.isMapDisplaySetUIVisible())
+//			{
+//				mActivity.showMapDisplaySetUIFragment(viewTop);
+//			}
+//			else
+//			{
+//				mActivity.closeMapDisplaySetUIFragment();
+//			}
+//			break;
+//			
+//		case R.id.btn_map_oper_my_car:
+//			// open my car pop up bar view layer
+//			mActivity.getMapOperFragment().openMyCarPopupBar();
+//			break;
+
+		case R.id.btn_map_oper_my_location:
+			// call switch location mode process
+			mActivity.getMapViewFragment().switchLocationMode();
+			break;
+			
+		default:
+			break;
+		}
+	}
+
+	@Override
+	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+	{
+		// TODO Auto-generated method stub
+	}
+	
+	public void setScaleViewLayout()
+	{
+		float scaleX;
+		float scaleY;
+		
+		View view = findViewById(R.id.btn_map_oper_my_location);
+		if(view == null){
+			return;
+		}
+		scaleX = view.getX() + view.getWidth() + SCALE_VIEW_MARGIN_LEFT;
+		scaleY = getY() + view.getY() + view.getHeight() / 2;
+		
+		mActivity.getMapViewFragment().setScalePosition(scaleX, scaleY);
+		mActivity.getMapViewFragment().setCompassPosition(new Point(50, 150));
+	}
+	
+//	public boolean isPermitMyCarBtnVisible()
+//	{
+//		return mIsPermitMyCarBtnVisible;
+//	}
+//	
+//	public void setIsPermitMyCarBtnVisible(boolean val)
+//	{
+//		mIsPermitMyCarBtnVisible = val;
+//		
+//		setupImgBtnMyCarControlState();
+//	}
+
+	// class LbsManagerListenerImpl
+	private class LbsManagerListenerImpl implements LbsManagerListener
+	{
+		@Override
+		public void onIsCCPOnMapCenterChanged(boolean isCCPOnMapCenter)
+		{
+			if (!isCCPOnMapCenter)
+			{
+				mBtnLocMode.setBackgroundResource(R.drawable.selector_btn_lbs_map_return_ccp);
+			}
+			else if (mBdLbsManagerAdapter.getCurrLocationMode() == LocationMode.NORMAL)
+			{
+				mBtnLocMode.setBackgroundResource(R.drawable.selector_btn_lbs_map_north_up);
+			}
+			else // if (mBdLbsManagerAdapter.getCurrLocationMode() == LocationMode.COMPASS)
+			{
+				mBtnLocMode.setBackgroundResource(R.drawable.selector_btn_lbs_map_head_up);
+			}
+		}
+
+		@Override
+		public void onMapLocationModeChanged(LocationMode locationMode)
+		{
+			if (locationMode == LocationMode.NORMAL)
+			{
+				mBtnLocMode.setBackgroundResource(R.drawable.selector_btn_lbs_map_north_up);
+			}
+			else // if (locationMode == LocationMode.COMPASS)
+			{
+				mBtnLocMode.setBackgroundResource(R.drawable.selector_btn_lbs_map_head_up);
+			}
+		}
+	}
+	
+	// class OnDataSetListenerImpl
+	private class OnDataSetListenerImpl implements OnDataSetListener
+	{
+		@Override
+		public void onMyCarSwitchFlagSet(boolean setFlag)
+		{
+			//setupImgBtnMyCarControlState(setFlag);
+		}
+	}
+}

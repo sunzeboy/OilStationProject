@@ -1,0 +1,39 @@
+package cn.sh.changxing.ct.mobile.logic.lbs;
+
+import java.util.List;
+
+import cn.sh.changxing.ct.mobile.bdmap.adapter.entity.PoiInfoEx;
+
+import com.baidu.mapapi.map.BaiduMap;
+
+/**
+ * 
+ * @ClassName: IMarkerListInMapLogic 
+ * @Description:  IMarkerListInMapLogic
+ * @author caiyingshui 
+ * @date 2015年4月9日 下午1:23:12 
+ *
+ */
+public interface IMarkerListInMapListener
+{
+	/**
+	 * 显示marker
+	 * @param baiduMap
+	 * @param list
+	 */
+	public void showMarker(BaiduMap baiduMap, List<PoiInfoEx> list);
+	/**
+	 * 删除marker
+	 */
+	public void removeMarker();
+	/**
+	 * 高亮选中marker
+	 * @param baiduMap
+	 * @param index
+	 */
+	public void highlightSelectMarker(BaiduMap baiduMap, int index);
+	/**
+	 * 清除选中状态
+	 */
+	public void clearFocusMarker();
+}

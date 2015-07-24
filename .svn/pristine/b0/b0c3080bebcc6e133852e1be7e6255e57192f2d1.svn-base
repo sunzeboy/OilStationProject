@@ -1,0 +1,118 @@
+package cn.sh.changxing.ct.mobile.preference;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+
+/**
+ * <b>Function Name：</b> SharedPrefernces操作共通接口 <br>
+ * <b>History：</b>2015/04/10 liuzhenqian create<br>
+ * <br>
+ * 
+ * @author SIS liuzhenqian
+ * @version 1.0.0 2015/04/10
+ */
+public class SharedPreferenceHelper{
+	
+	/** 单例 */
+	private static SharedPreferenceHelper sInstance;
+	/** SharedPreferences声明 */
+	private SharedPreferences mSharedPreferences;
+	
+	/** 
+	 * 构造函数
+	 */
+	public SharedPreferenceHelper(Context context,String fileName){
+		mSharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
+	}
+	
+	/** 
+	 * 单例方法
+	 */
+	public static synchronized SharedPreferenceHelper getInstance(Context context,String fileName)
+	{
+		if(sInstance == null)
+		{
+			sInstance = new SharedPreferenceHelper(context,fileName);
+			sInstance.mSharedPreferences = context.getSharedPreferences("AccountLogin",Context.MODE_PRIVATE);
+		}
+		return sInstance;
+	}
+	
+	/**
+	 * 设置String类型数据
+	 * @param key
+	 * @param value
+	 */
+	public void setStringValue(String key, String value)
+	{
+		mSharedPreferences.edit().putString(key, value).commit();
+	}
+	
+	/**
+	 * 取得String类型数据
+	 * @param key
+	 * @param defvalue
+	 */
+	public String getStringValue(String key, String defaultValue)
+	{
+		return mSharedPreferences.getString(key, defaultValue);
+	}
+	
+	/**
+	 * 清除数据
+	 */
+	public void clearData()
+	{
+		mSharedPreferences.edit().clear().commit();
+	}
+	
+	/**
+	 * 删除关键字所对应的值
+	 * @param name
+	 */
+	public void removeData(String name)
+	{
+		mSharedPreferences.edit().remove(name).commit();
+	}
+	
+	/**
+	* 设置INT类型数据
+	* @param key
+	* @param value
+	*/
+	public void setIntValue(String key, int value)
+	{
+		mSharedPreferences.edit().putInt(key, value).commit();
+	}
+	 
+	/**
+	* 取得INT类型数据
+	* @param key
+	* @return
+	*/
+	public int getIntValue(String key, int defaultValue)
+	{
+		return mSharedPreferences.getInt(key, defaultValue);
+	}
+	
+	/**
+	 * 设置boolean类型数据
+	 * @param key
+	 * @param value
+	 */
+	public void setBooleanValue(String key, boolean value)
+	{
+		mSharedPreferences.edit().putBoolean(key, value).commit();
+	}
+	
+	/**
+	 * 取得boolean类型数据
+	 * @param key
+	 * @return
+	 */
+	public boolean getBooleanValue(String key, boolean defaultValue)
+	{
+		return mSharedPreferences.getBoolean(key, defaultValue);
+	}
+}
+

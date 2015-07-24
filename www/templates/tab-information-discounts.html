@@ -1,0 +1,40 @@
+<style type="text/css">
+.item {
+    padding-bottom: 8px;
+    vertical-align: center;
+}
+
+.item span {
+    font-size: 90%;
+}
+
+.item p {
+    margin-top: 5px;
+    font-size: 75%;
+}
+
+.item-thumbnail-left,
+.item-thumbnail-left .item-content {
+    padding-top: 8px;
+    padding-left: 106px;
+    min-height: 64px;
+}
+
+.item-thumbnail-left > img:first-child,
+.item-thumbnail-left .item-image,
+.item-thumbnail-left .item-content > img:first-child,
+.item-thumbnail-left .item-content .item-image {
+    top: 8px;
+    max-height: 46px;
+}
+</style>
+<ion-view>
+    <ion-nav-title>{{getTitle()}}</ion-nav-title>
+    <ion-content>
+        <ion-item class="item item-thumbnail-left" ng-repeat="discount in getDiscounts()" type="item-text-wrap" ng-click="onShowPopupWindow('{{discount.url}}')">
+            <img ng-src="{{discount.thumbnail}}">
+            <span>{{discount.title}}</span>
+            <p>{{discount.discription}}</p>
+        </ion-item>
+    </ion-content>
+</ion-view>

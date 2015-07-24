@@ -1,0 +1,22 @@
+//
+//  CustomCell.h
+//  GasStationAPP
+//
+//  Created by sunze on 15/6/16.
+//  Copyright (c) 2015年 sunze. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+@class CustomLabel;
+@interface CustomCell : UITableViewCell
+@property (weak, nonatomic) IBOutlet UILabel *name;
+@property (weak, nonatomic) IBOutlet UILabel *juLiLabel;
+@property (weak, nonatomic) IBOutlet UILabel *dizhiLabel;
+@property (retain, nonatomic) IBOutlet CustomLabel *oiltypeG92;
+@property (retain, nonatomic) IBOutlet CustomLabel *oiltypeG95;
+@property (retain, nonatomic) IBOutlet CustomLabel *oiltypeD0;
+
+
+
+
+@end

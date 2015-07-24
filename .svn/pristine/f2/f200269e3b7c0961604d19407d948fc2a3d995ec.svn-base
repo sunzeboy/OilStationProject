@@ -1,0 +1,325 @@
+package cn.sh.changxing.ct.mobile.logic.lbs;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import android.content.Context;
+import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+import android.widget.Toast;
+import com.ionicframework.cnpcmobile317812.R;
+import cn.sh.changxing.ct.mobile.activity.LbsActivity;
+import cn.sh.changxing.ct.mobile.bdmap.adapter.entity.PoiInfoDetailEx;
+import cn.sh.changxing.ct.mobile.bdmap.adapter.entity.PoiInfoEx;
+import cn.sh.changxing.ct.mobile.dialog.lbs.DialogLoading;
+
+import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.search.core.PoiInfo;
+import com.baidu.mapapi.search.core.SearchResult;
+import com.baidu.mapapi.search.poi.OnGetPoiSearchResultListener;
+import com.baidu.mapapi.search.poi.PoiDetailResult;
+import com.baidu.mapapi.search.poi.PoiDetailSearchOption;
+import com.baidu.mapapi.search.poi.PoiNearbySearchOption;
+import com.baidu.mapapi.search.poi.PoiResult;
+import com.baidu.mapapi.search.poi.PoiSearch;
+import com.baidu.mapapi.search.poi.PoiSortType;
+
+/**
+ * @author 康军 2014-04-20
+ */
+public class SearchAroundPoiLogic implements OnGetPoiSearchResultListener {
+	public static final String ACTION_SEARCH_AROUND_FINISH = "cn.sh.changxing.ct.mobile.logic.lbs.search.around.poi.finish";
+	public static final String ACTION_SEARCH_AROUND_DETAIL_FINISH = "cn.sh.changxing.ct.mobile.logic.lbs.search.around.detail.poi.finish";
+
+	public static final String ACTION_SEARCH_AROUND_TIMEOUT = "cn.sh.changxing.ct.mobile.logic.lbs.search.around.time.out";
+	public static final String ACTION_SEARCH_AROUND_TIMEOUT_CLOSE_DIALOG = "cn.sh.changxing.ct.mobile.logic.lbs.search.around.time.out.close_dialog";
+
+	private static SearchAroundPoiLogic mSearchAroundPoiLogic;
+	private static LbsActivity mActivity;
+	private PoiSearch mPoiSearch = null;
+	protected DialogLoading mProgressDialog;
+	private static final int mRadius = 5000 * 10;
+	private static boolean mIsFirstLoad = false;
+
+	private Object WaitAnswer = new Object();
+
+	public ArrayList<PoiInfoEx> mlistPoiInfoEx = new ArrayList<PoiInfoEx>();
+	public ArrayList<PoiInfoDetailEx> mlistPoiDetail = new ArrayList<PoiInfoDetailEx>();
+	private ArrayList<PoiInfoDetailEx> mlistIndexPoiDetail = new ArrayList<PoiInfoDetailEx>();
+
+	private int mPoiCount = 0;
+	private final String LOG_TAG = getClass().getSimpleName();
+	// 最后一页
+	private boolean mIsLastPage = false;
+	// 第一页
+	private boolean mIsFirstPage = false;
+	// POI检索结果总页数
+	private int mPageCount = 0;
+	// 目前暂时不需要检索详情，以后式样变更再定
+	private boolean mNeedSearchDetail = false;
+	// 加载数据超时计数器
+	private Timer mTimeOutNotify = new Timer();
+	// 加载超时消息ID
+	private final static int MSG_RECEIVED_TIME_OUT = 0x11;
+
+	public static synchronized SearchAroundPoiLogic getInstance(
+			Context context) {
+		if(mSearchAroundPoiLogic != null){
+			return mSearchAroundPoiLogic;
+		}
+		
+		mSearchAroundPoiLogic = new SearchAroundPoiLogic();
+		mActivity = (LbsActivity) context;
+		return mSearchAroundPoiLogic;
+	}
+
+	private SearchAroundPoiLogic() {
+		initObjects();
+	}
+
+	private void initObjects() {
+		mPoiSearch = PoiSearch.newInstance();
+		mPoiSearch.setOnGetPoiSearchResultListener(this);
+	}
+
+	/*
+	 * 附近Poi检索
+	 */
+	public void searchNormalAroundPoi(String key, int index, boolean isFirst,
+			LatLng latlng) {
+		Log.i(LOG_TAG, "searchNormalAroundPoi key：" + key + " pageNum:" + index
+				+ " latlng" + latlng);
+
+		mIsFirstLoad = isFirst;
+		if (mTimeOutNotify == null) {
+			mTimeOutNotify = new Timer();
+		}
+		mTimeOutNotify.schedule(new NotifyTimeOut(), 1000 * 60);
+
+		/*
+		 * if (!needSearchDetail) { Log.i(LOG_TAG, "needSearchDetail is false");
+		 * if (mIsFirstLoad){ Log.i(LOG_TAG, "show loading dialog");
+		 * showLoadDialog(); } }
+		 */
+		mPoiSearch.searchNearby((new PoiNearbySearchOption()).location(latlng)
+				.sortType(PoiSortType.distance_from_near_to_far)
+				.radius(mRadius).keyword(key).pageNum(index).pageCapacity(10));
+	}
+
+	// 搜索加油站
+	public boolean sercherFillingStation(int index, boolean isFirst,
+			LatLng latlng) {
+		if (mActivity == null) {
+			return false;
+		}
+		String key = mActivity.getResources().getString(
+				R.string.lbs_search_filling_station_china_petroleum);
+
+		searchNormalAroundPoi(key, index, isFirst, latlng);
+		return true;
+	}
+
+	@Override
+	public void onGetPoiResult(PoiResult result) {
+		// 有结果就先关闭Timer
+		destroyTimer();
+
+		if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
+			Log.i(LOG_TAG, "不能取得POI信息...");
+			Intent intent = new Intent();
+			intent.setAction(ACTION_SEARCH_AROUND_TIMEOUT_CLOSE_DIALOG);
+
+			mActivity.sendBroadcast(intent);
+			return;
+		}
+
+		mIsFirstPage = (result.getCurrentPageNum() == 0);
+		mPageCount = result.getTotalPageNum();
+		mIsLastPage = (result.getCurrentPageNum() + 1 == mPageCount);
+
+		if (mIsFirstPage) {
+			mlistPoiInfoEx.clear();
+		}
+		synchronized (mActivity) {
+			List<PoiInfo> listPoiInfo = result.getAllPoi();
+			for (PoiInfo info : listPoiInfo) {
+				mlistPoiInfoEx.add(new PoiInfoEx(info));
+			}
+		}
+	
+
+		if (mlistPoiInfoEx != null) {
+
+			if (mNeedSearchDetail) {
+				/*
+				 * if (mIsFirstLoad){ showLoadDialog(); }
+				 */
+				mlistIndexPoiDetail = new ArrayList<PoiInfoDetailEx>();
+				mPoiCount = mlistPoiInfoEx.size();
+				Log.i(LOG_TAG, "取得的POI数量：" + mPoiCount);
+				mThreadSearchDetai.start();
+			} else {
+				Log.i(LOG_TAG, "dismissLoadDialog");
+				dismissLoadDialog();
+				// 不需要检索详情，直接发送结束广播
+				Intent intent = new Intent();
+				intent.setAction(ACTION_SEARCH_AROUND_FINISH);
+				intent.putExtra("IsFirstLoad", mIsFirstLoad);
+				intent.putExtra("isLastPage", mIsLastPage);
+				intent.putExtra("isFirstPage", mIsFirstPage);
+				mActivity.sendBroadcast(intent);
+			}
+
+		} else {
+			Toast.makeText(mActivity, "没有数据。。。", Toast.LENGTH_SHORT).show();
+			Log.i(LOG_TAG, "return data is null dismissLoadDialog");
+			dismissLoadDialog();
+			Log.i(LOG_TAG, "取得的POI=null...");
+			clearData();
+		}
+	}
+
+	public ArrayList<PoiInfoEx> getListPoiInfoEx(){
+		synchronized (mActivity){
+			return mlistPoiInfoEx;
+		}
+	}
+	
+	private Thread mThreadSearchDetai = new Thread(new Runnable() {
+		@Override
+		public void run() {
+			for (int i = 0; i < mlistPoiInfoEx.size(); i++) {
+				PoiDetailSearchOption detailOption = new PoiDetailSearchOption();
+				detailOption.poiUid(mlistPoiInfoEx.get(i).uid);
+				mPoiSearch.searchPoiDetail(detailOption);
+				Log.i(LOG_TAG, "取得的POI ADDRESS："
+						+ mlistPoiInfoEx.get(i).address + "开始poi详情搜索");
+				synchronized (WaitAnswer) {
+					try {
+						WaitAnswer.wait();
+						Log.i(LOG_TAG, "已发送详情检索，等待回应。。");
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	});
+
+	@Override
+	public void onGetPoiDetailResult(PoiDetailResult result) {
+		if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
+			Log.i(LOG_TAG, "不能取得POI详细信息...");
+			return;
+		}
+		Log.i(LOG_TAG, "取得详情的POI地址：" + result.getAddress());
+		mlistIndexPoiDetail.add(new PoiInfoDetailEx(result));
+		Log.i(LOG_TAG,
+				"mIndexPoiDetailList size==" + mlistIndexPoiDetail.size());
+		if (mlistIndexPoiDetail.size() == mPoiCount) {
+			Log.i(LOG_TAG,
+					"mIndexPoiDetailList size==" + mlistIndexPoiDetail.size()
+							+ "==mPoiCount===" + mPoiCount);
+			if (mIsFirstLoad) {
+				Log.i(LOG_TAG, "dismissLoadDialog");
+				dismissLoadDialog();
+			}
+
+			mlistPoiDetail.addAll(mlistIndexPoiDetail);
+
+			for (PoiInfoDetailEx detail : mlistPoiDetail) {
+				Log.i(LOG_TAG,
+						"刷新前取得的detail名称：" + detail.getPoiName() + "--地址:"
+								+ detail.getAddress() + "--URL:"
+								+ detail.getDetailUrl());
+			}
+			Intent intent = new Intent();
+			intent.setAction(ACTION_SEARCH_AROUND_DETAIL_FINISH);
+			intent.putExtra("IsFirstLoad", mIsFirstLoad);
+			intent.putExtra("isLastPage", mIsLastPage);
+			intent.putExtra("isFirstPage", mIsFirstPage);
+			mActivity.sendBroadcast(intent);
+
+		}
+		synchronized (WaitAnswer) {
+			WaitAnswer.notify();
+			Log.i(LOG_TAG, "继续通知。。");
+		}
+
+	}
+
+	public void clearData() {
+		mlistPoiInfoEx = new ArrayList<PoiInfoEx>();
+		mlistIndexPoiDetail = new ArrayList<PoiInfoDetailEx>();
+		mlistPoiDetail = new ArrayList<PoiInfoDetailEx>();
+	}
+
+	/**
+	 * 加载数据对话框
+	 */
+	protected void showLoadDialog() {
+		if (mProgressDialog == null) {
+			mProgressDialog = new DialogLoading(mActivity);
+		}
+		if (!mProgressDialog.isShowing()) {
+			mProgressDialog.setMessage(mActivity
+					.getString(R.string.lbs_offline_map_loading_tip));
+			mProgressDialog.setCancelable(true);
+			try {
+				mProgressDialog.show();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+	}
+
+	/**** dismiss对话框 **/
+	public void dismissLoadDialog() {
+		if (mProgressDialog != null && mProgressDialog.isShowing()) {
+			mProgressDialog.dismiss();
+		}
+	}
+
+	private Handler mHandler = new Handler() {
+		public void handleMessage(Message msg) {
+			if (msg.what == MSG_RECEIVED_TIME_OUT) {
+				Log.i(LOG_TAG, "MSG_RECEIVED_TIME_OUT");
+				// dismissLoadDialog();
+				Intent intent = new Intent();
+				intent.setAction(ACTION_SEARCH_AROUND_TIMEOUT);
+				mActivity.sendBroadcast(intent);
+				Toast.makeText(mActivity, "网络请求超时，请稍后再试...", Toast.LENGTH_SHORT)
+						.show();
+			}
+		};
+	};
+
+	private void destroyTimer() {
+		if (mTimeOutNotify != null) {
+			mTimeOutNotify.cancel();
+			mTimeOutNotify = null;
+			Log.i(LOG_TAG, " mTimeOutNotify.cancel");
+		}
+
+	}
+
+	class NotifyTimeOut extends TimerTask {
+
+		@Override
+		public void run() {
+			try {
+				destroyTimer();
+				Message msg = new Message();
+				msg.what = MSG_RECEIVED_TIME_OUT;
+				mHandler.sendMessage(msg);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+}

@@ -1,0 +1,59 @@
+<style type="text/css">
+li {
+    text-align: center;
+    border: 1px solid transparent;
+}
+
+.background-30 {
+    background: rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.3);
+    background: transparent\9;
+    zoom: 1;
+    filter: progid: DXImageTransform.Microsoft.gradient(startColorstr=#4C000000, endColorstr=#4C000000);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#4C000000, endColorstr=#4C000000)";
+}
+
+.col {
+    padding: 0px;
+}
+
+.col-function {
+    float: left;
+    padding: 25px 10px;
+}
+
+.img-advertisement {
+    display: block;
+    width: 100%;
+    height: 220px;
+}
+
+.span-function {
+    font-size: 85%;
+}
+
+.img-function {
+    display: inline-block;
+    width: 40%;
+}
+</style>
+<ion-view>
+    <ion-nav-title>{{getTitle()}}</ion-nav-title>
+    <ion-content>
+        <div class="col col-100">
+            <ion-slide-box does-continue="true" auto-play="true" pager-click="onSlideBoxPageClick(index)">
+                <ion-slide ng-repeat="advertisement in getAdvertisements()" ng-click="onShowPopupWindow('{{advertisement.url}}')">
+                    <img class="img-advertisement" ng-src="{{advertisement.thumbnail}}">
+                </ion-slide>
+            </ion-slide-box>
+        </div>
+        <ul>
+            <li class="col col-33 col-function" ng-repeat="function in getFunctions()" ng-click="onShowPopupWindow('{{function.url}}')" ng-style="{'border-bottom': '1px solid lightgray', 'border-left': function.id % 3 == 1 ? '1px solid lightgray' : '1px solid transparent','border-right': function.id % 3 == 1 ? '1px solid lightgray' : '1px solid transparent'}">
+                <div>
+                    <img class="img-function" ng-src="{{function.icon}}" />
+                </div>
+                <span class="span-function">{{function.title}}</span>
+            </li>
+        </ul>
+    </ion-content>
+</ion-view>

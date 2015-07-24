@@ -1,0 +1,18 @@
+//
+//  PostModel.h
+//  cnpc-mobile
+//
+//  Created by Wang ChenWei on 15/6/24.
+//
+//
+
+#import <Foundation/Foundation.h>
+@interface PostModel : NSObject
+
+@property (assign,nonatomic) NSString * longitude;
+@property (assign,nonatomic) NSString * latitude;
+@property (copy,nonatomic)   NSString *stationName;
+@property (assign,nonatomic) NSString * distance;
+@property (copy,nonatomic)   NSString *address;
+
+@end

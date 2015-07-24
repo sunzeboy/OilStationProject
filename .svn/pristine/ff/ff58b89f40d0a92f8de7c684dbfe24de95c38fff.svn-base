@@ -1,0 +1,907 @@
+package cn.sh.changxing.ct.mobile.comm;
+
+import java.util.Stack;
+import android.app.Activity;
+import android.app.Fragment;
+import android.app.Fragment.SavedState;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Message;
+import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
+import com.ionicframework.cnpcmobile317812.R;
+
+/**
+ * <b>Function Name：</b>activity base class<br>
+ * <b>History：</b>2013/2/18 wangjianqing create<br>
+ * <br>
+ *
+ * @author SIS wangjianqing
+ * @version 1.0.0 2013/2/18
+ */
+public class ActivityEx extends Activity
+{
+	// string for logging the class name
+	protected final String LOG_TAG = getClass().getSimpleName();
+	protected final static boolean isLog = true;
+	
+	// member variable
+	private FragmentsManagerImpl mFragmentsManagerImpl;
+	private boolean mIsFinishOnFragmentsNone;
+	
+	// constructor
+	public ActivityEx()
+	{
+		super();
+		
+		mFragmentsManagerImpl = new FragmentsManagerImpl(getFragmentManager());
+		setIsFinishOnFragmentsNone(true);
+	}
+	
+	public void invokeActivity(Class<?> cls)
+	{
+		Intent invokeIntent = new Intent(this, cls);
+		startActivity(invokeIntent);
+		
+		// 自定义动画的效果
+		overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+	}
+	
+	public void invokeActivity(Intent invokeIntent)
+	{
+		startActivity(invokeIntent);
+		
+		// 自定义动画的效果
+		overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+	}
+	
+	protected IFragmentsManager getFragmentsManager()
+	{
+		return mFragmentsManagerImpl;
+	}
+	
+	protected boolean isFinishOnFragmentsNone()
+	{
+		return mIsFinishOnFragmentsNone;
+	}
+	
+	protected void setIsFinishOnFragmentsNone(boolean b)
+	{
+		mIsFinishOnFragmentsNone = b;
+	}
+	
+	protected void replaceFragment(int containerViewId, FragmentEx fragment, boolean isSetCustomAnimations)
+	{
+		FragmentManager fragmentManager = getFragmentManager();
+		
+		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+		// 如果设置使用自定义动画的效果的场合
+		if (isSetCustomAnimations)
+		{
+			// 自定义动画的效果
+	        fragmentTransaction.setCustomAnimations(
+					        		R.animator.fragment_slide_left_enter,
+				                    R.animator.fragment_slide_left_exit);
+		}
+		fragmentTransaction.replace(containerViewId, fragment);
+		fragmentTransaction.commit();
+	}
+	
+	protected void replaceFragment(int containerViewId, FragmentEx fragment)
+	{
+		replaceFragment(containerViewId, fragment, true);
+	}
+	
+	protected void detachFragment(FragmentEx fragment, boolean isSetCustomAnimations)
+	{
+		FragmentManager fragmentManager = getFragmentManager();
+		
+		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+		
+		// 如果设置使用自定义动画的效果的场合
+		if (isSetCustomAnimations)
+		{
+			// 自定义动画的效果
+	        fragmentTransaction.setCustomAnimations(
+					        		R.animator.fragment_slide_left_enter,
+				                    R.animator.fragment_slide_left_exit);
+		}
+		fragmentTransaction.detach(fragment);
+		fragmentTransaction.remove(fragment);
+		fragmentTransaction.commit();
+	}
+	
+	protected void detachFragment(FragmentEx fragment)
+	{
+		detachFragment(fragment, true);
+	}
+	
+	/**
+	 * 删除堆栈里面所有的fragment
+	 * @param containerViewId
+	 * @param fragment
+	 * @param tag
+	 */
+	protected void deleteAllPushedFragment()
+	{
+		mFragmentsManagerImpl.savePeekedFragmentInstanceState();
+		mFragmentsManagerImpl.detachPeekedFragment();
+		mFragmentsManagerImpl.clearFragments();
+	}
+	
+	/**
+	 * 清除堆栈里面所有的fragment，接着显示一个fragment，并且把它加入到堆栈里面
+	 * @param containerViewId
+	 * @param fragment
+	 * @param tag
+	 */
+	protected void clearAndShowPushFragment(int containerViewId, FragmentEx fragment, String tag)
+	{
+		mFragmentsManagerImpl.clearFragments();
+		showPushFragment(containerViewId, fragment, tag);
+	}
+	
+	/**
+	 * 显示一个fragment，并且把它加入到堆栈里面
+	 * @param containerViewId
+	 * @param fragment
+	 * @param tag
+	 */
+	protected void showPushFragment(int containerViewId, FragmentEx fragment, String tag)
+	{
+		showPushFragment(containerViewId, fragment, tag, false);
+	}
+	
+	/**
+	 * 显示一个fragment，并且把它加入到堆栈里面
+	 * 
+	 * @param containerViewId
+	 * @param fragment
+	 * @param tag
+	 * @param deleteSameInStack 
+	 * 							true:删除栈里面相同tag的fragment,并且将新的fragment加入栈顶
+	 * 							false:不删除,直接显示并且加入到栈顶
+	 * 
+	 */
+	protected void showPushFragment(int containerViewId, FragmentEx fragment, String tag, boolean deleteSameInStack)
+	{
+		showPushFragment(containerViewId, fragment, tag, deleteSameInStack, false);
+	}
+	
+	/**
+	 * 显示一个fragment，并且把它加入到堆栈里面
+	 * 
+	 * @param containerViewId
+	 * @param fragment
+	 * @param tag
+	 * @param deleteSameInStack
+	 * @param IsFinishActivityOnCloseFragment
+	 * 							true:删除栈里面相同tag的fragment,并且将新的fragment加入栈顶
+	 * 							false:不删除,直接显示并且加入到栈顶
+	 * 
+	 */
+	protected void showPushFragment(int containerViewId, FragmentEx fragment, String tag,
+									boolean deleteSameInStack, boolean isFinishActivityOnCloseFragment)
+	{
+		if (tag == null)
+		{
+			Log.w(LOG_TAG, "null tag...");
+			return;
+		}
+		
+		if (!deleteSameInStack)
+		{	
+			FragmentManager fragmentManager = getFragmentManager();
+			
+			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+			// 自定义动画的效果
+	        fragmentTransaction.setCustomAnimations(
+					        		R.animator.fragment_slide_left_enter,
+				                    R.animator.fragment_slide_left_exit);
+	        mFragmentsManagerImpl.savePeekedFragmentInstanceState();
+			fragmentTransaction.replace(containerViewId, fragment);
+			fragmentTransaction.commit();
+
+			mFragmentsManagerImpl.pushFragment(fragment, tag, containerViewId, isFinishActivityOnCloseFragment);
+		}
+		else
+		{
+			FragmentManager fragmentManager = getFragmentManager();
+			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+			
+			// 自定义动画的效果
+	        fragmentTransaction.setCustomAnimations(
+					        		R.animator.fragment_slide_left_enter,
+				                    R.animator.fragment_slide_left_exit);
+						
+			for (int i = 0; i < mFragmentsManagerImpl.mFragmentStack.size(); i++)
+			{
+				FragmentExData data = mFragmentsManagerImpl.mFragmentStack.get(i);
+				
+				if (tag.equals(data.tag))
+				{
+					fragmentTransaction.detach(data.fragment);
+					fragmentTransaction.remove(data.fragment);
+					mFragmentsManagerImpl.mFragmentStack.remove(data);
+					// mFragmentsManagerImpl.mFragmentStack 第i个值被改变了，下一轮继续从第i个开始查询
+					i = i - 1;
+				}
+			}
+
+	        mFragmentsManagerImpl.savePeekedFragmentInstanceState();
+			fragmentTransaction.replace(containerViewId, fragment);
+			fragmentTransaction.commit();
+			
+			mFragmentsManagerImpl.pushFragment(fragment, tag, containerViewId, isFinishActivityOnCloseFragment);
+		}
+	}
+	
+	/**
+	 * 根据tag，从堆栈里面找出对应的fragment，移到栈顶并显示
+	 * @param tag
+	 * @param boolean : true 堆栈里面存在相同tag，成功显示
+	 * @param           false 堆栈里面不存在相同tag，显示失败，需手动重新创建显示
+	 */
+	protected boolean showExistentFragmentByTag(String tag)
+	{
+		FragmentExData exData = new FragmentExData();
+		
+		if ((mFragmentsManagerImpl.mFragmentStack == null) ||
+			(mFragmentsManagerImpl.mFragmentStack.size() == 0) ||
+			(tag == null))
+		{
+			Log.w(LOG_TAG, "no fragment in stack...");
+			return false;
+		}
+		
+		for (FragmentExData data: mFragmentsManagerImpl.mFragmentStack)
+		{
+			if (tag.equals(data.tag))
+			{
+				exData.containerId = data.containerId;
+				exData.fragment = data.fragment;
+				exData.tag = data.tag;
+				exData.isFinishActivityOnCloseFragment = data.isFinishActivityOnCloseFragment;
+				mFragmentsManagerImpl.mFragmentStack.remove(data);
+				showPushFragment(exData.containerId, exData.fragment, exData.tag, false, exData.isFinishActivityOnCloseFragment);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * 关闭栈顶的fragment
+	 */
+	public void closePopFragmentOnTop()
+	{
+		FragmentExData data = mFragmentsManagerImpl.popFragment();
+		
+		if (data != null && data.fragment != null)
+		{
+			try
+			{
+				FragmentManager fragmentManager = getFragmentManager();
+				FragmentTransaction fragmentTransaction = fragmentManager
+						.beginTransaction();
+				
+				// 自定义动画的效果
+		        fragmentTransaction.setCustomAnimations(
+						        		R.animator.fragment_slide_left_enter,
+					                    R.animator.fragment_slide_left_exit);
+
+				fragmentTransaction.detach(data.fragment);
+				fragmentTransaction.remove(data.fragment);
+
+				fragmentTransaction.commit();
+				
+				if (data.isFinishActivityOnCloseFragment)
+				{
+					finish();
+				}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		if (mFragmentsManagerImpl.getPausedFragmentSize() > 0)
+		{
+			data = mFragmentsManagerImpl.popFragment();
+			if (data != null && data.fragment != null)
+			{
+				showPushFragment(data.containerId, data.fragment, data.tag, false, data.isFinishActivityOnCloseFragment);
+			}
+		}
+		else if (isFinishOnFragmentsNone())
+		{
+			finish();
+		}
+	}
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState)
+	{
+		try
+		{
+			super.onCreate(savedInstanceState);
+			
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+								 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+	        
+	        if (isLog)
+	        {
+	        	Log.i(LOG_TAG, "Activity.onCreate()");
+	        }
+		}
+		catch (Exception ex)
+		{
+			if (isLog)
+			{
+				Log.e(LOG_TAG, "Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		try
+		{
+			mFragmentsManagerImpl.savePeekedFragmentInstanceState();
+			
+			mFragmentsManagerImpl.onSaveInstanceState(outState);
+			
+			super.onSaveInstanceState(outState);
+
+	        if (isLog)
+	        {
+	        	Log.i(LOG_TAG, "Activity.onSaveInstanceState()");
+	        }
+		}
+		catch (Exception ex)
+		{
+			if (isLog)
+			{
+				Log.e(LOG_TAG, "Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+	
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState)
+	{
+		try
+		{
+			super.onRestoreInstanceState(savedInstanceState);
+			
+			mFragmentsManagerImpl.onRestoreInstanceState(savedInstanceState);
+			
+			mFragmentsManagerImpl.reAttachPeekedFragment();
+
+	        if (isLog)
+	        {
+	        	Log.i(LOG_TAG, "Activity.onRestoreInstanceState()");
+	        }
+		}
+		catch (Exception ex)
+		{
+			if (isLog)
+			{
+				Log.e(LOG_TAG, "Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	protected void onStart()
+	{
+		try
+		{
+			super.onStart();
+	        
+	        if (isLog)
+	        {
+	        	Log.i(LOG_TAG, "Activity.onStart()");
+	        }
+		}
+		catch (Exception ex)
+		{
+			if (isLog)
+			{
+				Log.e(LOG_TAG, "Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+    protected void onRestart()
+	{
+		try
+		{
+			super.onRestart();
+			
+			mFragmentsManagerImpl.reAttachPeekedFragment();
+			
+	        if (isLog)
+	        {
+	        	Log.i(LOG_TAG, "Activity.onRestart()");
+	        }
+		}
+		catch (Exception ex)
+		{
+			if (isLog)
+			{
+				Log.e(LOG_TAG, "Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	protected void onResume()
+	{
+		try
+		{
+			super.onResume();
+			
+	        if (isLog)
+	        {
+	        	Log.i(LOG_TAG, "Activity.onResume()");
+	        }
+		}
+		catch (Exception ex)
+		{
+			if (isLog)
+			{
+				Log.e(LOG_TAG, "Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	protected void onPause()
+	{
+		try
+		{
+			super.onPause();
+	
+	        if (isLog)
+	        {
+	        	Log.i(LOG_TAG, "Activity.onPause()");
+	        }
+		}
+		catch (Exception ex)
+		{
+			if (isLog)
+			{
+				Log.e(LOG_TAG, "Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+    protected void onStop()
+	{
+		try
+		{
+			super.onStop();
+	
+	        if (isLog)
+	        {
+	        	Log.i(LOG_TAG, "Activity.onStop()");
+	        }
+		}
+		catch (Exception ex)
+		{
+			if (isLog)
+			{
+				Log.e(LOG_TAG, "Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+    protected void onDestroy()
+	{
+		try
+		{
+			super.onDestroy();
+			
+			if (isLog)
+			{
+				Log.i(LOG_TAG, "Activity.onDestroy()");
+			}
+		}
+		catch (Exception ex)
+		{
+			if (isLog)
+			{
+				Log.e(LOG_TAG, "Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+	
+	@Override
+	public void onLowMemory()
+	{
+		try
+		{
+			super.onLowMemory();
+			
+			if (isLog)
+			{
+				Log.w(LOG_TAG, "==== Activity.onLowMemory() is called! ====");
+			}
+		}
+		catch (Exception ex)
+		{
+			if (isLog)
+			{
+				Log.e(LOG_TAG, "Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+	
+	@Override
+	public void finish()
+	{
+		super.finish();
+		
+		// 自定义动画的效果
+		overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+	}
+	
+	protected Message newMsg(int what)
+	{
+		Message msg = new Message();
+		msg.what = what;
+		return msg;
+	}
+
+	protected void requestFullScreen()
+	{
+		try
+		{
+	        getWindow().setFlags(
+	        		WindowManager.LayoutParams. FLAG_FULLSCREEN,     
+	        		WindowManager.LayoutParams. FLAG_FULLSCREEN);
+		}
+		catch (Exception ex)
+		{
+			if (isLog)
+			{
+				Log.e(LOG_TAG, "Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+	
+	@Override
+	public void onBackPressed()
+	{
+		try
+		{
+			if (mFragmentsManagerImpl.getPausedFragmentSize() != 0)
+			{
+				closePopFragmentOnTop();
+				return;
+			}
+			else
+			{
+				super.onBackPressed();
+			}
+			
+			if (isLog)
+			{
+				Log.i(LOG_TAG, "onBackPressed()");
+			}
+		}
+		catch (Exception ex)
+		{
+			if (isLog)
+			{
+				Log.e(LOG_TAG, "Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+	
+	private class FragmentsManagerImpl implements IFragmentsManager
+	{
+		// constant definition
+		private final static String KEY_NAME_OF_FRAGMENT_STACK_SIZE = "ActivityEx_FragmentStackSize";
+		private final static String KEY_NAME_PREFIX_OF_CLASS_NAME_IDX = "FragmentEx_Class_Name_Idx_";
+		private final static String KEY_NAME_PREFIX_OF_ARGUMENTS_IDX = "FragmentEx_Arguments_Idx_";
+		private final static String KEY_NAME_PREFIX_OF_FRAGMENT_STATE_IDX = "FragmentEx_Fragment_State_Idx_";
+		private final static String KEY_NAME_PREFIX_OF_TAG_IDX = "FragmentEx_Tag_Idx_";
+		private final static String KEY_NAME_PREFIX_OF_CONTAINERID_IDX = "FragmentEx_ContainerId_Idx_";
+		private final static String KEY_NAME_PREFIX_OF_IS_FINISH_ACTIVITY_ON_CLOSE_FRAGMENT_IDX = "FragmentEx_Is_Finish_Activity_On_Close_Fragment_Idx_";
+		
+		// member variable
+		private Stack<FragmentExData> mFragmentStack = new Stack<FragmentExData>();
+		private FragmentManager mFragmentManager;
+		
+		// constructor
+		public FragmentsManagerImpl(FragmentManager fragmentManager)
+		{
+			mFragmentManager = fragmentManager;
+		}
+		
+		protected void detachPeekedFragment()
+		{
+			if (mFragmentStack.size() > 0)
+			{
+				FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+
+				FragmentExData data = peekFragment();
+				fragmentTransaction.remove(data.fragment);
+				fragmentTransaction.commit();
+			}
+		}
+		
+		protected void onSaveInstanceState(Bundle outState)
+		{
+			if (mFragmentStack.size() > 0)
+			{
+				outState.putInt(KEY_NAME_OF_FRAGMENT_STACK_SIZE, mFragmentStack.size());
+				Log.i(getClass().getSimpleName(), "onSaveInstanceState():" + KEY_NAME_OF_FRAGMENT_STACK_SIZE + "=[" + mFragmentStack.size() + "]");
+				for (int i = 0; i < mFragmentStack.size(); i++)
+				{
+					FragmentExData data = mFragmentStack.get(i);
+					Log.i(getClass().getSimpleName(), "onSaveInstanceState():" + KEY_NAME_PREFIX_OF_FRAGMENT_STATE_IDX + i + "=[" + data.fragment + "]");
+					Log.i(getClass().getSimpleName(), "onSaveInstanceState():" + KEY_NAME_PREFIX_OF_TAG_IDX + i + "=[" + data.tag + "]");
+					Log.i(getClass().getSimpleName(), "onSaveInstanceState():" + KEY_NAME_PREFIX_OF_CONTAINERID_IDX + i + "=[" + data.containerId + "]");
+					outState.putString(KEY_NAME_PREFIX_OF_CLASS_NAME_IDX + i, data.fragment.getClass().getName());
+					outState.putBundle(KEY_NAME_PREFIX_OF_ARGUMENTS_IDX + i, data.arguments);
+					outState.putParcelable(KEY_NAME_PREFIX_OF_FRAGMENT_STATE_IDX + i, data.savedState);
+					outState.putString(KEY_NAME_PREFIX_OF_TAG_IDX + i, data.tag);
+					outState.putInt(KEY_NAME_PREFIX_OF_CONTAINERID_IDX + i, data.containerId);
+					outState.putBoolean(KEY_NAME_PREFIX_OF_IS_FINISH_ACTIVITY_ON_CLOSE_FRAGMENT_IDX + i, data.isFinishActivityOnCloseFragment);
+				} // i
+			}
+		}
+		
+		protected void onRestoreInstanceState(Bundle savedInstanceState)
+		{
+			int fragmentStackSize = savedInstanceState.getInt(KEY_NAME_OF_FRAGMENT_STACK_SIZE);
+			Log.i(getClass().getSimpleName(), "onRestoreInstanceState():" + KEY_NAME_OF_FRAGMENT_STACK_SIZE + "=[" + fragmentStackSize + "]");
+			if (fragmentStackSize > 0)
+			{
+				mFragmentStack.clear();
+				for (int i = 0; i < fragmentStackSize; i++)
+				{
+					FragmentExData data = new FragmentExData();
+					String fname = savedInstanceState.getString(KEY_NAME_PREFIX_OF_CLASS_NAME_IDX + i);
+					Bundle arguments = savedInstanceState.getBundle(KEY_NAME_PREFIX_OF_ARGUMENTS_IDX + i);
+					SavedState savedState = savedInstanceState.getParcelable(KEY_NAME_PREFIX_OF_FRAGMENT_STATE_IDX + i);
+					String tag = savedInstanceState.getString(KEY_NAME_PREFIX_OF_TAG_IDX + i);
+					int containerId = savedInstanceState.getInt(KEY_NAME_PREFIX_OF_CONTAINERID_IDX + i);
+					boolean isFinishActivityOnCloseFragment = savedInstanceState.getBoolean(KEY_NAME_PREFIX_OF_IS_FINISH_ACTIVITY_ON_CLOSE_FRAGMENT_IDX + i, false);
+					// find the top fragment extend data
+					if (i == (fragmentStackSize - 1))
+					{
+						Fragment fragment = mFragmentManager.findFragmentById(containerId);
+						if ((fragment != null) &&
+							(fragment instanceof FragmentEx) &&
+							(fragment.getClass().getName().equals(fname)))
+						{
+							data.fragment = (FragmentEx) fragment;
+						}
+						else
+						{
+							Log.e(LOG_TAG, "FragmentsManagerImpl.onRestoreInstanceState(): Can not find valid top fragment which is restored automatically by current activity!");
+							Log.e(LOG_TAG, "FragmentsManagerImpl.onRestoreInstanceState(): data.fragment=[" + data.fragment + "]");
+						}
+					}
+					// restore fragment extend data
+					if (data.fragment == null)
+					{
+						data.fragment = (FragmentEx) FragmentEx.instantiate(ActivityEx.this, fname, arguments);
+						data.fragment.setInitialSavedState(savedState);
+					}
+					data.arguments = arguments;
+					data.savedState = savedState;
+					data.tag = tag;
+					data.containerId = containerId;
+					data.isFinishActivityOnCloseFragment = isFinishActivityOnCloseFragment;
+					Log.i(getClass().getSimpleName(), "onRestoreInstanceState():" + KEY_NAME_PREFIX_OF_FRAGMENT_STATE_IDX + i + "=[" + data.fragment + "]");
+					Log.i(getClass().getSimpleName(), "onRestoreInstanceState():" + KEY_NAME_PREFIX_OF_TAG_IDX + i + "=[" + data.tag + "]");
+					Log.i(getClass().getSimpleName(), "onRestoreInstanceState():" + KEY_NAME_PREFIX_OF_CONTAINERID_IDX + i + "=[" + data.containerId + "]");
+					mFragmentStack.add(i, data);
+				} // i
+			}
+		}
+		
+		protected void reAttachPeekedFragment()
+		{
+			if (mFragmentStack.size() > 0)
+			{
+				FragmentExData data = peekFragment();
+				Fragment fragment = mFragmentManager.findFragmentById(data.containerId);
+				if ((fragment == null) || fragment.isDetached() || !fragment.isAdded())
+				{
+					FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+		
+					fragmentTransaction.replace(data.containerId, data.fragment);
+					fragmentTransaction.commit();
+				}
+			}
+		}
+		
+		protected void savePeekedFragmentInstanceState()
+		{
+			FragmentExData data = peekFragment();
+			try
+			{
+				if (data != null)
+				{
+					if (data.savedState == null)
+					{
+						data.savedState = mFragmentManager.saveFragmentInstanceState(data.fragment);
+					}
+				}
+			}
+			catch (IllegalStateException isex)
+			{
+				isex.printStackTrace();
+			}
+		}
+		
+		@Override
+		public void pushFragment(FragmentEx fragment, String tag, int containerId, boolean isFinishActivityOnCloseFragment)
+		{
+			try
+			{	
+				synchronized (this)
+				{
+					FragmentExData data = new FragmentExData();
+					data.fragment = fragment;
+					data.arguments = fragment.getArguments();
+					data.savedState = null;
+					data.tag = tag;
+					data.containerId = containerId;
+					data.isFinishActivityOnCloseFragment = isFinishActivityOnCloseFragment;
+					mFragmentStack.push(data);
+				} // synchronized (this)
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+
+		@Override
+		public FragmentExData popFragment()
+		{
+			FragmentExData data = null;
+			
+			try
+			{
+				synchronized (this)
+				{
+					if (mFragmentStack.size() != 0)
+					{
+						data = mFragmentStack.pop();
+					}
+				} // synchronized (this)
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
+			
+			return data;
+		}
+
+		@Override
+		public FragmentExData peekFragment()
+		{
+			FragmentExData data = null;
+			
+			try
+			{
+				synchronized (this)
+				{
+					if (mFragmentStack.size() != 0)
+					{
+						data = mFragmentStack.peek();
+					}
+				} // synchronized (this)
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
+			
+			return data;
+		}
+
+		@Override
+		public void clearFragments()
+		{
+			try
+			{
+				synchronized (this)
+				{
+					if (mFragmentStack.size() != 0)
+					{
+						mFragmentStack.clear();
+					}
+				} // synchronized (this)
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+		
+		@Override
+		public boolean removeFragmentByTag(String tag)
+		{
+			boolean ret = false;
+			
+			try
+			{
+				synchronized (this)
+				{
+					if (mFragmentStack.size() == 0 || tag == null)
+					{
+						return ret;
+					}
+					
+					for (int i = 0; i < mFragmentStack.size(); i++)
+					{
+						FragmentExData data = mFragmentStack.get(i);
+						if (tag.equals(data.tag))
+						{
+							mFragmentStack.remove(data);
+							ret = true;
+							break;
+						}
+					} // i
+				} // synchronized (this)
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
+			
+			return ret;
+		}
+
+		@Override
+		public int getPausedFragmentSize()
+		{
+			int size = 0;
+
+			try
+			{
+				synchronized (this)
+				{
+					size = mFragmentStack.size();
+				} // synchronized (this)
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
+			
+			return size;
+		}
+	}
+}

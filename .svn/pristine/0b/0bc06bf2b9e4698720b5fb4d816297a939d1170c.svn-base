@@ -1,0 +1,15 @@
+//
+//  Helpers.h
+//  GasStationAPP
+//
+//  Created by sunze on 15/6/16.
+//  Copyright (c) 2015年 sunze. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+@class TopDownBtn;
+@interface Helpers : NSObject
++(UIButton*)createLuKuangButtonWithFrame:(CGRect)frame ImageName:(NSString*)imageName Target:(id)target Action:(SEL)action Title:(NSString*)title;
++(TopDownBtn *)createLocationButtonWithFrame:(CGRect)frame ImageName1:(NSString *)imageName1 ImageName2:(NSString *)ImageName2 Target:(id)target Action:(SEL)action Title:(NSString*)title;
+
+@end

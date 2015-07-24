@@ -1,0 +1,103 @@
+package cn.sh.changxing.ct.mobile.fragment.lbs;
+
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.View.OnClickListener;
+import android.widget.ImageButton;
+
+import com.ionicframework.cnpcmobile317812.R;
+import cn.sh.changxing.ct.mobile.activity.LbsActivity;
+import cn.sh.changxing.ct.mobile.comm.FragmentEx;
+
+
+/**
+ * <b>Function Name：</b>加油站详细信息<br>
+ * <b>History：</b>2015/3/26 wangyong create<br>
+ * <br>
+ */
+public class GasStationDetailedInfoFragment extends FragmentEx 
+					implements OnClickListener{
+	
+	private LbsActivity mLbsActivity;
+	private ImageButton mBtnBack;
+	
+	public GasStationDetailedInfoFragment() {
+
+	}
+
+	private void getControlObjects() {
+		mLbsActivity = (LbsActivity) getActivity();
+		mBtnBack = (ImageButton) mActivity
+				.findViewById(R.id.btn_lbs_back);
+	}
+
+
+	private void setControlObjects() {
+		mBtnBack.setOnClickListener(this);
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = inflater.inflate(
+				R.layout.fragment_lbs_gas_station_detailed_info, container,
+				false);
+
+		return view;
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+
+	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+
+		getControlObjects();
+		setControlObjects();
+
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId())
+		{
+		case R.id.btn_lbs_back:
+			mActivity.closePopFragmentOnTop();
+			break;
+		default:
+			break;
+		}
+		
+	}
+}

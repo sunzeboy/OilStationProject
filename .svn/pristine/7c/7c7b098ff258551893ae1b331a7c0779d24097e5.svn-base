@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cn.sh.changxing.ct.mobile.view.lbs.MapMenuBarViewLayer
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/white" >
+   
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:orientation="vertical" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/tv_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/lbs_map_result_list_name"
+                    android:textSize="@dimen/lbs_map_item_name_font_size"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_address"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/frenchgrey"
+                    android:text="@string/lbs_map_result_list_address"
+                    android:textSize="@dimen/lbs_map_item_name_font_address_size" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_distance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:text="@string/lbs_kilometre"
+                android:textSize="@dimen/lbs_map_item_name_font_oil_size" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical" >
+
+                <TextView
+                    android:id="@+id/tv_type_92"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:background="@color/lightskyblue"
+                    android:text="@string/lbs_settings_oli_type_92"
+                    android:textSize="@dimen/lbs_map_item_name_font_oil_size" />
+
+                <TextView
+                    android:id="@+id/tv_price_92"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:paddingLeft="5dp"
+                    android:background="@color/cornsilk"
+                    android:layout_toRightOf="@+id/tv_type_92"
+                    android:text="@string/lbs_settings_oli_type_prompt_value"
+                    android:textSize="@dimen/lbs_map_item_name_font_oil_size" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:gravity="center_vertical" >
+
+                <TextView
+                    android:id="@+id/tv_type_95"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:background="@color/lightskyblue"
+                    android:text="@string/lbs_settings_oli_type_95"
+                    android:textSize="@dimen/lbs_map_item_name_font_oil_size" />
+
+                <TextView
+                    android:id="@+id/tv_price_95"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:background="@color/cornsilk"
+                    android:paddingLeft="5dp"
+                    android:layout_toRightOf="@+id/tv_type_95"
+                    android:text="@string/lbs_settings_oli_type_prompt_value"
+                    android:textSize="@dimen/lbs_map_item_name_font_oil_size" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:gravity="center_vertical" >
+
+                <TextView
+                    android:id="@+id/tv_type_0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:background="@color/lightskyblue"
+                    android:text="@string/lbs_settings_oli_type_0"
+                    android:textSize="@dimen/lbs_map_item_name_font_oil_size" />
+
+                <TextView
+                    android:id="@+id/tv_price_0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/cornsilk"
+                    android:paddingLeft="5dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_toRightOf="@+id/tv_type_0"
+                    android:text="@string/lbs_settings_oli_type_prompt_value"
+                    android:textSize="@dimen/lbs_map_item_name_font_oil_size" />
+            </RelativeLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/lbs_settings_item_height"
+        android:layout_marginTop="1dp" >
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5" 
+            android:background="@color/snow"
+            >
+
+            <TextView
+                android:id="@+id/tv_details"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:background="@color/transparent"
+                android:text="@string/lbs_details"
+                android:textSize="@dimen/lbs_map_item_name_font_size" />
+
+        </FrameLayout>
+        
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent" 
+            android:layout_marginLeft="1dp"
+            android:background="@color/snow"
+            android:layout_weight="0.5" >
+              <TextView
+                android:id="@+id/tv_navigation"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="@dimen/lbs_map_item_name_font_size"
+                android:background="@color/transparent"
+                android:text="@string/lbs_navigation" />
+        </FrameLayout>
+
+    </LinearLayout>
+   
+ 
+    
+    
+    
+    
+    
+
+</cn.sh.changxing.ct.mobile.view.lbs.MapMenuBarViewLayer>

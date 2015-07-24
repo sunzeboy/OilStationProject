@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="marker_index_nomal_icon">
+        <item>@drawable/pic_icon_marka</item>
+        <item>@drawable/pic_icon_markb</item>
+        <item>@drawable/pic_icon_markc</item>
+        <item>@drawable/pic_icon_markd</item>
+        <item>@drawable/pic_icon_marke</item>
+        <item>@drawable/pic_icon_markf</item>
+        <item>@drawable/pic_icon_markg</item>
+        <item>@drawable/pic_icon_markh</item>
+        <item>@drawable/pic_icon_marki</item>
+        <item>@drawable/pic_icon_markj</item>
+    </string-array>
+    
+    <string-array name="marker_index_focus_icon">
+        <item>@drawable/pic_icon_focus_marka</item>
+        <item>@drawable/pic_icon_focus_markb</item>
+        <item>@drawable/pic_icon_focus_markc</item>
+        <item>@drawable/pic_icon_focus_markd</item>
+        <item>@drawable/pic_icon_focus_marke</item>
+        <item>@drawable/pic_icon_focus_markf</item>
+        <item>@drawable/pic_icon_focus_markg</item>
+        <item>@drawable/pic_icon_focus_markh</item>
+        <item>@drawable/pic_icon_focus_marki</item>
+        <item>@drawable/pic_icon_focus_markj</item>
+    </string-array>
+</resources>

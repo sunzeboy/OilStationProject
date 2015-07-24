@@ -1,0 +1,46 @@
+package cn.sh.changxing.ct.mobile.comm;
+
+/**
+ * 
+ * @ClassName: IFragmentsManager 
+ * @Description:  fragment 堆栈管理接口
+ * @author caiyingshui 
+ * @date 2015年4月8日 下午2:30:12 
+ *
+ */
+public interface IFragmentsManager
+{
+	/**
+	 * 将fragment 压入堆栈
+	 * @param fragment
+	 * @param tag
+	 * @param containerId
+	 * @param isFinishActivityOnCloseFragment
+	 */
+	public void pushFragment(FragmentEx fragment, String tag, int containerId, boolean isFinishActivityOnCloseFragment);
+	/**
+	 * 弹出栈顶的fragment
+	 * @return
+	 */
+	public FragmentExData popFragment();
+	/**
+	 * 读取后继续保留栈顶的fragment
+	 * @return
+	 */
+	public FragmentExData peekFragment();
+	/**
+	 * 清除堆栈里面所有的fragment
+	 */
+	public void clearFragments();
+	/**
+	 * 根据tag清除堆栈里面的fragment
+	 * @param tag
+	 * @return
+	 */
+	public boolean removeFragmentByTag(String tag);
+	/**
+	 * 获取堆栈中未显示的fragment
+	 * @return
+	 */
+	public int getPausedFragmentSize();
+}

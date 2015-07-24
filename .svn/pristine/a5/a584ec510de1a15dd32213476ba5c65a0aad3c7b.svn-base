@@ -1,0 +1,47 @@
+//
+//  Helpers.m
+//  GasStationAPP
+//
+//  Created by sunze on 15/6/16.
+//  Copyright (c) 2015年 sunze. All rights reserved.
+//
+
+#import "Helpers.h"
+#import "TopDownBtn.h"
+@implementation Helpers
++(UIButton*)createLuKuangButtonWithFrame:(CGRect)frame ImageName:(NSString*)imageName Target:(id)target Action:(SEL)action Title:(NSString*)title
+{
+    UIButton*button=[UIButton buttonWithType:UIButtonTypeRoundedRect];
+    button.frame = frame;
+    [button setBackgroundImage:[UIImage imageNamed:imageName] forState:UIControlStateNormal];
+    [button setBackgroundColor:[UIColor lightGrayColor]];
+    [button setTitle:title forState:UIControlStateNormal];
+    [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
+    return button;
+
+
+}
++(UIButton *)createLuKuangButtonWithFrame:(CGRect)frame ImageName:(NSString *)imageName Target:(id)target Action:(SEL)action
+{
+    UIButton*button=[UIButton buttonWithType:UIButtonTypeRoundedRect];
+    button.frame = frame;
+    [button setBackgroundColor:[UIColor lightGrayColor]];
+    [button setTitle:@"选择型号" forState:UIControlStateNormal];
+    [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
+    return button;
+    
+}
+
++(TopDownBtn *)createLocationButtonWithFrame:(CGRect)frame ImageName1:(NSString *)imageName1 ImageName2:(NSString *)ImageName2 Target:(id)target Action:(SEL)action Title:(NSString*)title
+{
+    
+    TopDownBtn*button=[TopDownBtn buttonWithType:UIButtonTypeCustom];
+    button.frame=frame;
+    [button setTitle:title forState:UIControlStateNormal];
+    [button setBackgroundImage:[UIImage imageNamed:imageName1] forState:UIControlStateNormal];
+    [button setBackgroundImage:[UIImage imageNamed:ImageName2] forState:UIControlStateHighlighted];
+    [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
+    return button;
+}
+
+@end

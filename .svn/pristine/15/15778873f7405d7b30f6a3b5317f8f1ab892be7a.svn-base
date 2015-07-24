@@ -1,0 +1,27 @@
+//
+//  ResponseModel.h
+//  cnpc-mobile
+//
+//  Created by Wang ChenWei on 15/6/24.
+//
+//
+
+#import <Foundation/Foundation.h>
+
+@interface ResponseModel : NSObject
+@property (copy,nonatomic) NSString *stationCode;
+@property (copy,nonatomic) NSString *grade;
+@property (copy,nonatomic)   NSString *stationName;
+@property (assign,nonatomic) NSString * distance;
+@property (copy,nonatomic)   NSString *address;
+@property (assign,nonatomic) NSString * longitude;
+@property (assign,nonatomic) NSString * latitude;
+@property (copy,nonatomic) NSDictionary *oilType;
+@property (copy,nonatomic) NSDictionary *refuelMode;
+@property (copy,nonatomic) NSDictionary *paymentMethod;
+@property (copy,nonatomic) NSDictionary *serviceFacility;
+
+
+
+
+@end

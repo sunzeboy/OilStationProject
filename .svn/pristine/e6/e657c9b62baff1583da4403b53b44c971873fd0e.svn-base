@@ -1,0 +1,173 @@
+package cn.sh.changxing.ct.mobile.preference.adapter;
+
+import java.util.ArrayList;
+import java.util.List;
+import android.content.Context;
+import cn.sh.changxing.ct.mobile.bdmap.adapter.BdLbsManagerAdapter.LbsMapDispMode;
+import cn.sh.changxing.ct.mobile.preference.SharedPreferenceHelper;
+
+public class LbsDataAdapter
+{
+	// constant definition
+	public final static String LBS_SHARE_PREF_FILE_NAME = "changxing_ctmobile_lbs_share_pref";
+	public final static String LBS_MAP_TRAFFIC_ENABLED_FLAG_KEY_NAME = "LbsMapTrafficEnabledMode";
+	public final static String LBS_MAP_DISP_MODE_KEY_NAME = "LbsMapDispMode";
+	public final static String FAVORITED_POI_SWITCH_FLAG_KEY_NAME = "FavoritedPoiSwitchFlag";
+	public final static String MY_CAR_SWITCH_FLAG_KEY_NAME = "MyCarSwitchFlag";
+	public final static String GLOBAL_EYES_SWITCH_FLAG_KEY_NAME = "GlobalEyesSwitchFlag";
+	
+	// interface declaration
+	public interface OnDataSetListener
+	{
+		//public void onFavoritedPoiSwitchFlagSet(boolean setFlag);
+		
+		public void onMyCarSwitchFlagSet(boolean setFlag);
+		
+		//public void onGlobalEyesSwitchFlagSet(boolean setFlag);
+		
+		//public void onLbsMapDispModeSet(LbsMapDispMode setValue);
+	}
+	
+	// static variable
+	private static List<OnDataSetListener> mOnDataSetListeners = new ArrayList<OnDataSetListener>();
+	
+	// member variable
+	private SharedPreferenceHelper mSharedPreferenceHelper;
+	
+	public LbsDataAdapter(Context context)
+	{
+		mSharedPreferenceHelper = new SharedPreferenceHelper(context, LBS_SHARE_PREF_FILE_NAME);
+	}
+	
+	public boolean addOnDataSetListener(OnDataSetListener listener)
+	{
+		boolean ret = true;
+		
+		try
+		{
+			if (listener == null)
+			{
+				ret = false;
+				return ret;
+			}
+
+			synchronized (mOnDataSetListeners)
+			{
+				if (!mOnDataSetListeners.contains(listener))
+				{
+					mOnDataSetListeners.add(listener);
+				}
+			} // synchronized (OnDataSetListener)
+		}
+		catch (Exception ex)
+		{
+			System.err.println("Exception:" + ex.getMessage());
+			ex.printStackTrace();
+			ret = false;
+		}
+		
+		return ret;
+	}
+	
+	public boolean removeOnDataSetListener(OnDataSetListener listener)
+	{
+		boolean ret = true;
+		
+		try
+		{
+			if (listener == null)
+			{
+				ret = false;
+				return ret;
+			}
+			
+			synchronized (mOnDataSetListeners)
+			{
+				if (mOnDataSetListeners.contains(listener))
+				{
+					mOnDataSetListeners.remove(listener);
+				}
+			} // synchronized (mOnDataChangedListeners)
+		}
+		catch (Exception ex)
+		{
+			System.err.println("Exception" + ex.getMessage());
+			ex.printStackTrace();
+			ret = false;
+		}
+		
+		return ret;
+	}
+	
+	protected void triggerOnMyCarSwitchFlagSet(boolean setFlag)
+	{
+		synchronized (mOnDataSetListeners)
+		{
+			for (int i = 0; i < mOnDataSetListeners.size(); i++)
+			{
+				OnDataSetListener listener = mOnDataSetListeners.get(i);
+				
+				try
+				{
+					listener.onMyCarSwitchFlagSet(setFlag);
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+				}
+			} // i
+		} // synchronized (mOnDataSetListeners)
+	}
+
+	public void setFavoritedPoiSwitchFlag(boolean value)
+	{
+		mSharedPreferenceHelper.setBooleanValue(FAVORITED_POI_SWITCH_FLAG_KEY_NAME, value);
+	}
+	
+	public void setMyCarSwitchFlag(boolean value)
+	{
+		mSharedPreferenceHelper.setBooleanValue(MY_CAR_SWITCH_FLAG_KEY_NAME, value);
+		triggerOnMyCarSwitchFlagSet(value);
+	}
+	
+	public void setGlobalEyesSwitchFlag(boolean value)
+	{
+		mSharedPreferenceHelper.setBooleanValue(GLOBAL_EYES_SWITCH_FLAG_KEY_NAME, value);
+	}
+	
+	public void setLbsMapDispMode(LbsMapDispMode lbsMapDiapMode)
+	{
+		mSharedPreferenceHelper.setIntValue(LBS_MAP_DISP_MODE_KEY_NAME, lbsMapDiapMode.value());
+	}
+	
+	public void setLbsMapTrafficEnabledFlg(boolean value)
+	{
+		mSharedPreferenceHelper.setBooleanValue(LBS_MAP_TRAFFIC_ENABLED_FLAG_KEY_NAME, value);
+	}
+	
+	public boolean getFavoritedPoiSwitchFlag()
+	{
+		return mSharedPreferenceHelper.getBooleanValue(FAVORITED_POI_SWITCH_FLAG_KEY_NAME, false);
+	}
+	
+	public boolean getMyCarSwitchFlag()
+	{
+		return mSharedPreferenceHelper.getBooleanValue(MY_CAR_SWITCH_FLAG_KEY_NAME, false);
+	}
+	
+	public boolean getGlobalEyesSwitchFlag()
+	{
+		return mSharedPreferenceHelper.getBooleanValue(GLOBAL_EYES_SWITCH_FLAG_KEY_NAME, false);
+	}
+	
+	public LbsMapDispMode getLbsMapDispMode()
+	{
+		int value = mSharedPreferenceHelper.getIntValue(LBS_MAP_DISP_MODE_KEY_NAME, 0);
+		return LbsMapDispMode.convEnumValue(value);
+	}
+	
+	public boolean getLbsMapTrafficEnabledFlg()
+	{
+		return mSharedPreferenceHelper.getBooleanValue(LBS_MAP_TRAFFIC_ENABLED_FLAG_KEY_NAME, false);
+	}
+}

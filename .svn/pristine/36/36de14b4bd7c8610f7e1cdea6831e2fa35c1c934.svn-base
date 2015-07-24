@@ -1,0 +1,16 @@
+//
+//  CustomTypeCell.h
+//  cnpc-mobile
+//
+//  Created by Wang ChenWei on 15/6/24.
+//
+//
+
+#import <UIKit/UIKit.h>
+
+@interface CustomTypeCell : UITableViewCell
+@property (weak, nonatomic) IBOutlet UISwitch *switchBtn;
+@property (weak, nonatomic) IBOutlet UILabel *typeLabel;
+- (IBAction)switchBtn:(id)sender;
+
+@end

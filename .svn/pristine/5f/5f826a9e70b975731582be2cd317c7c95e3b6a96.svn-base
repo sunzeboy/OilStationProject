@@ -1,0 +1,21 @@
+//
+//  CustomTableView.m
+//  
+//
+//  Created by sunze on 15/6/18.
+//
+//
+
+#import "CustomTableView.h"
+
+@implementation CustomTableView
+- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
+{
+    if (self = [super initWithFrame:frame style:style]) {
+        [self.layer setBorderWidth:1];
+        [self.layer setBorderColor:[UIColor lightGrayColor].CGColor];
+    }
+    return self;
+}
+
+@end

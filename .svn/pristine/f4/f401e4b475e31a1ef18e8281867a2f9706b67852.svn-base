@@ -1,0 +1,17 @@
+<ion-tabs class="tabs-top tabs-striped tabs-assertive">
+    <ion-tab title="促销资讯" href="#/tab/information/discounts">
+        <ion-nav-view name="tab-information-discounts"></ion-nav-view>
+    </ion-tab>
+    <ion-tab title="活动预告" href="#/tab/information/events">
+        <ion-nav-view name="tab-information-events"></ion-nav-view>
+    </ion-tab>
+    <ion-tab title="汽车保养" href="#/tab/information/cars">
+        <ion-nav-view name="tab-information-cars"></ion-nav-view>
+    </ion-tab>
+    <ion-tab title="燃油知识" href="#/tab/information/oils">
+        <ion-nav-view name="tab-information-oils"></ion-nav-view>
+    </ion-tab>
+    <ion-tab title="业务介绍" href="#/tab/information/cards">
+        <ion-nav-view name="tab-information-cards"></ion-nav-view>
+    </ion-tab>
+</ion-tabs>

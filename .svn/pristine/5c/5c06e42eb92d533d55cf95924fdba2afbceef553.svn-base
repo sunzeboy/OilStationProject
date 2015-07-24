@@ -1,0 +1,25 @@
+package cn.sh.changxing.ct.mobile.logic.lbs.entity;
+
+public class OilInfoEntity {
+	public static final String TYPE_92="TYPE_92";
+	public static final String TYPE_95="TYPE_95";
+	public static final String TYPE_0="TYPE_0";
+	
+	// 类型
+	private String mType;
+	// 价格
+	private double mPrice;
+	
+	public String getType(){
+		return mType;
+	}
+	public void setType(String value){
+		mType = value;
+	}
+	public double getPrice(){
+		return mPrice;
+	}
+	public void setPrice(double value){
+		mPrice = value;
+	}
+}

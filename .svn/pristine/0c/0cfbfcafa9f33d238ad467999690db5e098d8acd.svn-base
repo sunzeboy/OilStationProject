@@ -1,0 +1,25 @@
+package cn.sh.changxing.ct.mobile.logic.lbs.marker;
+
+import android.content.Intent;
+import android.os.Bundle;
+import cn.sh.changxing.ct.mobile.logic.lbs.entity.MarkerInfoEntity;
+import cn.sh.changxing.ct.mobile.props.EnvInfo;
+
+public class IndexMarkerType extends BaseMarkerType
+{
+	public static final String ACTION_MARKER_CLICK="cn.sh.changxing.ct.mobile.logic.lbs.marker.indexmarkertype.marker_click";
+	@Override
+	public void onMarkerClick(MarkerInfoEntity entity)
+	{
+		if(entity == null){
+			return;
+		}
+	
+		Intent intent = new Intent();
+		intent.setAction(ACTION_MARKER_CLICK);
+		Bundle bundle = new Bundle();
+		bundle.putParcelable("PoiInfoEx", entity.getPoiInfoEx());
+		intent.putExtra("bundle", bundle);
+		EnvInfo.getInstance().getAppContext().sendBroadcast(intent);
+	}
+}

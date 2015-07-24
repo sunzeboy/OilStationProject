@@ -1,0 +1,13 @@
+//
+//  PostModel.m
+//  cnpc-mobile
+//
+//  Created by Wang ChenWei on 15/6/26.
+//
+//
+
+#import "PostModel.h"
+
+@implementation PostModel
+
+@end

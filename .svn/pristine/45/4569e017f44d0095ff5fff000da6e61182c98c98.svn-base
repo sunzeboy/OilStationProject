@@ -1,0 +1,125 @@
+package cn.sh.changxing.ct.mobile.fragment.lbs;
+
+
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import cn.sh.changxing.ct.mobile.bdmap.adapter.entity.PoiInfoEx;
+import cn.sh.changxing.ct.mobile.comm.FragmentEx;
+import cn.sh.changxing.ct.mobile.view.lbs.MapMenuBarViewLayer;
+import cn.sh.changxing.ct.mobile.view.lbs.MapOperViewLayer;
+import com.ionicframework.cnpcmobile317812.R;
+
+public class MapOperFragment extends FragmentEx
+{
+	// member variable
+	// 获取本地位置
+	//private MapPoiInfoPopupBarViewLayer mMapPoiInfoPopupBarViewLayer;
+	//private MapMyCarPopupBarViewLayer mMapMyCarPopupBarViewLayer;
+	// 地图下面的四个图标
+	private MapMenuBarViewLayer mMapMenuBarViewLayer;
+	// 地图内部的按钮控制
+	private MapOperViewLayer mMapOperViewLayer;
+	
+	public MapOperFragment()
+	{
+		// TODO Auto-generated constructor stub
+	}
+	
+	private void getControlObjects()
+	{
+		mMapMenuBarViewLayer =
+				(MapMenuBarViewLayer) getActivity().findViewById(R.id.layer_map_bottom_area);
+		mMapOperViewLayer =
+				(MapOperViewLayer) getActivity().findViewById(R.id.layer_map_oper);
+	}
+	
+	private void setControlObjects()
+	{
+		//mMapOperViewLayer.setIsPermitMyCarBtnVisible(true);
+		
+		resetSubViewLayers();
+	}
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState)
+	{
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+	}
+	
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+	{
+		View view = inflater.inflate(R.layout.fragment_lbs_map_oper, container, false);
+
+		return view;
+	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState)
+	{
+		super.onActivityCreated(savedInstanceState);
+		
+		getControlObjects();
+		setControlObjects();
+	}
+
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+	}
+
+	@Override
+	public void onPause()
+	{
+		super.onPause();
+	}
+
+	@Override
+	public void onDestroy()
+	{
+		super.onDestroy();
+	}
+	
+	public void openPoiInfoPopupBar(PoiInfoEx poiInfoEx)
+	{
+		//mMapMenuBarViewLayer.hideSelf();
+		//mMapMyCarPopupBarViewLayer.hideSelf();
+		//mMapPoiInfoPopupBarViewLayer.appearSelf();
+		//mMapPoiInfoPopupBarViewLayer.searchPoiInfo(poiInfoEx);
+	}
+	
+	public void openMyCarPopupBar()
+	{
+		//mMapMenuBarViewLayer.hideSelf();
+		//mMapPoiInfoPopupBarViewLayer.hideSelf();
+		//mMapMyCarPopupBarViewLayer.appearSelf();
+	}
+	
+	public void showMapMenuBar(boolean isShow){
+		if(isShow){
+			mMapMenuBarViewLayer.appearSelf();
+		}else{
+			mMapMenuBarViewLayer.hideSelf();
+		}
+	}
+	
+	public void resetSubViewLayers()
+	{		
+		mMapOperViewLayer.setScaleViewLayout();
+	}
+	
+	public boolean isPopupBarViewLayersHiding()
+	{
+		return true;
+	}
+	
+	public void updateUI(PoiInfoEx poiInfoEx){
+		mMapMenuBarViewLayer.updateUI(poiInfoEx);	
+	}
+    
+}

@@ -1,0 +1,91 @@
+package cn.sh.changxing.ct.mobile.comm;
+
+import android.app.Application;
+import android.util.Log;
+
+/**
+ * <b>Function Name：</b>application base class<br>
+ * <b>History：</b>2015/3/26 wangjianqing create<br>
+ * <br>
+ *
+ * @author SIS wangjianqing
+ * @version 1.0.0 2015/3/26
+ */
+public class ApplicationEx extends Application
+{
+	// string for logging the class name
+	protected final String LOG_TAG = getClass().getSimpleName();
+	protected final static boolean isLog = true;
+	
+	// constructor
+	public ApplicationEx()
+	{
+		super();
+	}
+	
+	@Override
+	public void onCreate()
+	{
+		try
+		{
+			super.onCreate();
+			
+	        if (isLog)
+	        {
+	        	Log.i(LOG_TAG, "Application.onCreate()");
+	        }
+		}
+		catch (Exception ex)
+		{
+			if (isLog)
+			{
+				Log.e(LOG_TAG, "Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+	
+	@Override
+	public void onLowMemory()
+	{
+		try
+		{
+			super.onLowMemory();
+			
+	        if (isLog)
+	        {
+	        	Log.i(LOG_TAG, "Application.onLowMemory()");
+	        }
+		}
+		catch (Exception ex)
+		{
+			if (isLog)
+			{
+				Log.e(LOG_TAG, "Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+	
+	@Override
+	public void onTerminate()
+	{
+		try
+		{
+			super.onTerminate();
+			
+			if (isLog)
+			{
+				Log.i(LOG_TAG, "Application.onTerminate()");
+			}
+		}
+		catch (Exception ex)
+		{
+			if (isLog)
+			{
+				Log.e(LOG_TAG, "Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+}

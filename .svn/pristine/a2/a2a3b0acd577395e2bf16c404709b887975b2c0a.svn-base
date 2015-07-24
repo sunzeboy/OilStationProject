@@ -1,0 +1,6 @@
+package cn.sh.changxing.ct.mobile.comm;
+
+public interface IDialogExListener
+{
+	public void onDialogClose();
+}

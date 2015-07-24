@@ -1,0 +1,46 @@
+package cn.sh.changxing.ct.mobile.preference;
+
+import android.content.Context;
+
+public class LbsSharedPreferenceSettings {
+	private static final String LBS_SETTINGS_OIL_TYPE_92="lbs_settings_oil_type_92";
+	private static final String LBS_SETTINGS_OIL_TYPE_95="lbs_settings_oil_type_95";
+	private static final String LBS_SETTINGS_OIL_TYPE_0="lbs_settings_oil_type_0";
+	private static final String LBS_SETTINGS_FILE_NAME="LbsSharedPreferenceSettings";
+	
+	private SharedPreferenceHelper mSharedPreferenceHelper;
+	private static LbsSharedPreferenceSettings sInstance;
+	
+	public LbsSharedPreferenceSettings(Context context){
+		
+		mSharedPreferenceHelper = new SharedPreferenceHelper(context,LBS_SETTINGS_FILE_NAME);
+	}
+
+	public static synchronized LbsSharedPreferenceSettings getInstance(Context context){
+		if(sInstance == null){
+			sInstance = new LbsSharedPreferenceSettings(context);
+		}
+		return sInstance;
+	}
+	
+	public boolean getLbsSettingsOilType92(){
+		 return mSharedPreferenceHelper.getBooleanValue(LBS_SETTINGS_OIL_TYPE_92, true);
+	}
+	public void setLbsSettingsOilType92(boolean value){
+		 mSharedPreferenceHelper.setBooleanValue(LBS_SETTINGS_OIL_TYPE_92, value);
+	}
+	
+	public boolean getLbsSettingsOilType95(){
+		 return mSharedPreferenceHelper.getBooleanValue(LBS_SETTINGS_OIL_TYPE_95, false);
+	}
+	public void setLbsSettingsOilType95(boolean value){
+		 mSharedPreferenceHelper.setBooleanValue(LBS_SETTINGS_OIL_TYPE_95, value);
+	}
+	
+	public boolean getLbsSettingsOilType0(){
+		 return mSharedPreferenceHelper.getBooleanValue(LBS_SETTINGS_OIL_TYPE_0, false);
+	}
+	public void setLbsSettingsOilType0(boolean value){
+		 mSharedPreferenceHelper.setBooleanValue(LBS_SETTINGS_OIL_TYPE_0, value);
+	}
+}

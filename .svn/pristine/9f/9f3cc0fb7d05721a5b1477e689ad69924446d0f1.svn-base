@@ -1,0 +1,142 @@
+package cn.sh.changxing.ct.mobile.view.lbs;
+
+import android.content.Context;
+import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import cn.sh.changxing.ct.mobile.activity.LbsActivity;
+import cn.sh.changxing.ct.mobile.activity.LbsActivity.UIFragmentType;
+import cn.sh.changxing.ct.mobile.comm.IOperViewLayer;
+import com.ionicframework.cnpcmobile317812.R;
+
+
+/**
+ * <b>Function Name：</b>MapSearchActionBarViewLayer class<br>
+ * <b>History：</b>2015/5/18 wangjianqing create<br>
+ * <br>
+ *
+ * @author SIS wangjianqing
+ * @version 1.0.0 2015/5/18
+ */
+public class MapSearchActionBarViewLayer extends RelativeLayout implements
+		IOperViewLayer, OnClickListener
+{
+	// member variable
+	private ImageButton mBtnBack;
+	//private TextView mTvSearch; wy
+	private Context mContext;
+	private LbsActivity mActivity;
+	private TextView mTvTitleType;
+	private ImageView mIvTitleList;
+	
+	public MapSearchActionBarViewLayer(Context context)
+	{
+		super(context);
+		
+		mContext = context;
+	}
+
+	public MapSearchActionBarViewLayer(Context context, AttributeSet attrs)
+	{
+		super(context, attrs);
+		
+		mContext = context;
+	}
+
+	public MapSearchActionBarViewLayer(Context context, AttributeSet attrs, int defStyle)
+	{
+		super(context, attrs, defStyle);
+		
+		mContext = context;
+	}
+	
+	private void setInterceptTouchEvent(View view)
+	{
+		view.setOnTouchListener(new OnTouchListener()
+		{
+			@Override
+			public boolean onTouch(View v, MotionEvent event)
+			{
+				// return true because of the listener has consumed the event.
+				return true;
+			}
+		});
+	}
+
+	private void getControlObjects()
+	{
+		mBtnBack = (ImageButton) findViewById(R.id.btn_map_title_back);
+		
+		mTvTitleType = (TextView) findViewById(R.id.tv_map_title_type);
+		mIvTitleList = (ImageView) findViewById(R.id.bt_map_title_list);
+		
+		mActivity = (LbsActivity) mContext;
+	}
+	
+	private void setControlObjects()
+	{
+		// set intercept touch event of view of fragment to upper view of layout
+		setInterceptTouchEvent(this);
+		mBtnBack.setOnClickListener(this);
+		mTvTitleType.setOnClickListener(this);
+		mIvTitleList.setOnClickListener(this);
+	}
+
+	@Override
+	public void initComponent()
+	{
+		getControlObjects();
+		setControlObjects();
+	}
+
+	@Override
+	public boolean isHiding()
+	{
+		return (getVisibility() != View.VISIBLE);
+	}
+
+	@Override
+	public void appearSelf()
+	{
+		setVisibility(View.VISIBLE);
+	}
+
+	@Override
+	public void hideSelf()
+	{
+		setVisibility(View.GONE);
+	}
+
+	@Override
+	public void dispose()
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onClick(View v)
+	{
+		switch (v.getId())
+		{
+		case R.id.btn_map_title_back:
+			mActivity.finish();
+			break;
+		case R.id.tv_map_title_type:
+			((LbsActivity) mActivity).showUIFragment(UIFragmentType.TYPE_SETTINGS_OIL_TYPE,
+					UIFragmentType.TYPE_SETTINGS_OIL_TYPE.toString(), true);
+			break;
+		case R.id.bt_map_title_list:
+			((LbsActivity) mActivity).showUIFragment(UIFragmentType.TYPE_RESULT_LIST_MAP,
+					UIFragmentType.TYPE_RESULT_LIST_MAP.toString(), true);
+			break;
+		default:
+			break;
+		}
+	}
+}

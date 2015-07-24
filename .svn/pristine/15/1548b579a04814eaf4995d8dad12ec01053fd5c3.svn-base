@@ -1,0 +1,8 @@
+package cn.sh.changxing.ct.mobile.logic.lbs.marker;
+
+import cn.sh.changxing.ct.mobile.logic.lbs.entity.MarkerInfoEntity;
+
+public abstract class BaseMarkerType
+{
+	public abstract void onMarkerClick(MarkerInfoEntity entity);
+}

@@ -1,0 +1,13 @@
+//
+//  OilTypeVC.h
+//  cnpc-mobile
+//
+//  Created by Wang ChenWei on 15/6/24.
+//
+//
+
+#import <UIKit/UIKit.h>
+
+@interface OilTypeVC : UIViewController
+
+@end

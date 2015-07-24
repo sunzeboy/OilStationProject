@@ -1,0 +1,250 @@
+package cn.sh.changxing.ct.mobile.bdmap.adapter;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
+import android.widget.Toast;
+
+import com.baidu.lbsapi.auth.LBSAuthManagerListener;
+import com.baidu.mapapi.map.MyLocationData;
+import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.search.core.PoiInfo;
+import com.baidu.navisdk.BNaviPoint;
+import com.baidu.navisdk.BaiduNaviManager;
+import com.baidu.navisdk.BNaviEngineManager.NaviEngineInitListener;
+import com.baidu.navisdk.BaiduNaviManager.OnStartNavigationListener;
+import com.baidu.navisdk.comapi.routeplan.RoutePlanParams.NE_RoutePlan_Mode;
+
+import cn.sh.changxing.ct.mobile.activity.NavigatorActivity;
+import cn.sh.changxing.ct.mobile.bdmap.adapter.entity.PoiInfoEx;
+//import cn.sh.changxing.ct.mobile.db.adapter.DestHistoryAdapter;
+
+/**
+ * <b>Function Name：</b>BdNaviManagerAdapter class<br>
+ * <b>History：</b>2015/4/29 wangjianqing create<br>
+ * <br>
+ *
+ * @author SIS wangjianqing
+ * @version 1.0.0 2015/4/29
+ */
+public class BdNaviManagerAdapter
+{
+	// static variable
+	private static BdNaviManagerAdapter mBdNaviManagerAdapterInst;
+
+	// member variable
+	private boolean mIsNaviEngineInitSuccess;
+
+	private NaviEngineInitListener mNaviEngineInitListenerImpl =
+		new NaviEngineInitListener()
+		{
+			public void engineInitSuccess()
+			{
+				mIsNaviEngineInitSuccess = true;
+			}
+	
+			public void engineInitStart()
+			{
+			}
+	
+			public void engineInitFail()
+			{
+			}
+		};
+		
+	// constructor
+	private BdNaviManagerAdapter()
+	{
+		mIsNaviEngineInitSuccess = false;
+	}
+	
+	private String getSdcardDir()
+	{
+		if (Environment.getExternalStorageState().equalsIgnoreCase(
+				Environment.MEDIA_MOUNTED))
+		{
+			return Environment.getExternalStorageDirectory().toString();
+		}
+		return null;
+	}
+
+	public synchronized static BdNaviManagerAdapter getInstance()
+	{
+		if (mBdNaviManagerAdapterInst == null)
+		{
+			mBdNaviManagerAdapterInst = new BdNaviManagerAdapter();
+		}
+		
+		return mBdNaviManagerAdapterInst;
+	}
+	
+	public synchronized void initNaviEngine(Activity activity)
+	{
+		final Context context = activity.getApplicationContext();
+		
+		BaiduNaviManager.getInstance().initEngine(activity, getSdcardDir(),
+			mNaviEngineInitListenerImpl, new LBSAuthManagerListener()
+			{
+                @Override
+                public void onAuthResult(int status, String msg)
+                {
+                    String str = null;
+                    if (0 == status)
+                    {
+                        str = "key校验成功!";
+                    }
+                    else
+                    {
+                        str = "key校验失败, " + msg;
+
+                        //Context context = EnvInfo.getInstance().getAppContext();
+                        Toast.makeText(context, str, Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+			
+		if (Build.VERSION.SDK_INT < 14)
+		{
+            BaiduNaviManager.getInstance().destroyNMapView();
+        }
+	}
+	
+	public synchronized boolean launchNavigator(
+									Activity activity,
+									PoiInfoEx startPoiInfoEx,
+									PoiInfoEx destPoiInfoEx,
+									int nRPPolicy,
+									int strategy)
+	{
+		boolean ret = true;
+		
+		if ((activity == null) ||
+			(startPoiInfoEx == null) ||
+			(destPoiInfoEx == null))
+		{
+			Log.e(getClass().getSimpleName(), "launchNavigator(): invalid parameter!");
+			ret = false;
+			return ret;
+		}
+		
+		LatLng ll = startPoiInfoEx.location;
+		BNaviPoint startPoint = new BNaviPoint(ll.longitude,
+											   ll.latitude,
+											   "MyLocationData",
+											   BNaviPoint.CoordinateType.BD09_MC);
+
+		ll = destPoiInfoEx.location;
+		BNaviPoint destPoint = new BNaviPoint(ll.longitude,
+											  ll.latitude,
+											  destPoiInfoEx.name,
+											  BNaviPoint.CoordinateType.BD09_MC);
+		
+		Context context = activity.getApplicationContext();
+		
+		try
+		{
+			BaiduNaviManager baiduNaviManager = BaiduNaviManager.getInstance();
+			baiduNaviManager.launchNavigator(
+									activity,
+					                startPoint,                                      			//起点（可指定坐标系）
+					                destPoint,                                       			//终点（可指定坐标系）
+					                nRPPolicy,       								 			//算路方式
+					                true,                                            			//真实导航
+					                strategy, 										 			//在离线策略
+					                new OnStartNavigationListenerImpl(context, destPoiInfoEx)	//跳转监听
+	                				);
+		}
+		catch (Exception ex)
+		{
+			System.err.println("Exception:" + ex.getMessage());
+			ex.printStackTrace();
+			ret = false;
+		}
+		
+		return ret;
+	}
+	
+	public boolean launchDefaultNavigator(
+									Activity activity,
+									MyLocationData curMyLocationData,
+									PoiInfoEx destPoiInfoEx)
+	{
+		boolean ret = true;
+		
+		if ((activity == null) ||
+			(curMyLocationData == null) ||
+			(destPoiInfoEx == null))
+		{
+			Log.e(getClass().getSimpleName(), "launchDefaultNavigator(): invalid parameter!");
+			ret = false;
+			return ret;
+		}
+		
+		PoiInfo startPoiInfo = new PoiInfo();
+		startPoiInfo.name = "MyLocationData";
+		startPoiInfo.address = startPoiInfo.name;
+		startPoiInfo.location = new LatLng(curMyLocationData.latitude,
+										   curMyLocationData.longitude);
+		PoiInfoEx startPoiInfoEx = new PoiInfoEx(startPoiInfo);
+		
+		ret = launchNavigator(activity,
+							  startPoiInfoEx,
+							  destPoiInfoEx,
+							  NE_RoutePlan_Mode.ROUTE_PLAN_MOD_MIN_TIME,
+							  BaiduNaviManager.STRATEGY_FORCE_ONLINE_PRIORITY);
+		
+		return ret;
+	}
+	
+	// class OnStartNavigationListenerImpl
+	private class OnStartNavigationListenerImpl implements OnStartNavigationListener
+	{
+		// member variable
+		private Context mContext;
+		private PoiInfoEx mDestPoiInfoEx;
+		
+		// constructor
+		public OnStartNavigationListenerImpl(Context context, PoiInfoEx destPoiInfoEx)
+		{
+			mContext = context;
+			mDestPoiInfoEx = destPoiInfoEx;
+		}
+
+		@Override
+		public void onJumpToDownloader()
+		{
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onJumpToNavigator(Bundle configParams)
+		{
+			//DestHistoryAdapter destHistoryAdapter = new DestHistoryAdapter(mContext);
+			
+			try
+			{
+				Intent intent = new Intent(mContext, NavigatorActivity.class);
+	            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+	            				Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+	            intent.putExtras(configParams);
+	            mContext.startActivity(intent);
+
+	            //destHistoryAdapter.insertDestHistory(mDestPoiInfoEx);
+			}
+			catch (Exception ex)
+			{
+				System.err.println("Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+			finally
+			{
+				//destHistoryAdapter.dbClose();
+			}
+		}
+	}
+}

@@ -1,0 +1,12 @@
+package cn.sh.changxing.ct.mobile.logic.lbs.marker;
+
+public final class UserMarkerType
+{
+	//public final static MapPoiMarkerType MARKER_MAP_POI = new MapPoiMarkerType();
+	
+	//public final static FavoritedPoiMarkerType MARKER_FAVORITED_POI = new FavoritedPoiMarkerType();
+	
+	//public final static GlobalEyeMarkerType MARKER_GLOBAL_EYE = new GlobalEyeMarkerType();
+	
+	public final static IndexMarkerType MARKER_INDEX_POI = new IndexMarkerType();
+}

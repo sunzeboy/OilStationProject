@@ -1,0 +1,356 @@
+package cn.sh.changxing.ct.mobile.bdmap.adapter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.content.Context;
+import android.util.Log;
+import cn.sh.changxing.ct.mobile.bdmap.adapter.entity.PoiInfoEx;
+//import cn.sh.changxing.ct.mobile.db.adapter.FavoriteAddrDbAdapter;
+//import cn.sh.changxing.ct.mobile.db.entity.FavoriteAddrEntity;
+//import cn.sh.changxing.ct.mobile.logic.lbs.MarkerManagerLogic;
+//import cn.sh.changxing.ct.mobile.logic.lbs.marker.UserMarkerType;
+//import cn.sh.changxing.ct.mobile.preference.adapter.LbsDataAdapter;
+
+import com.baidu.location.BDLocation;
+import com.baidu.mapapi.SDKInitializer;
+import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.MapStatus;
+import com.baidu.mapapi.map.MapStatusUpdate;
+import com.baidu.mapapi.map.MapStatusUpdateFactory;
+import com.baidu.mapapi.map.MyLocationConfiguration.LocationMode;
+
+/**
+ * <b>Function Name：</b>BaiduLbsSDKMgrAdapter class<br>
+ * <b>History：</b>2015/3/26 wangjianqing create<br>
+ * <br>
+ *
+ * @author SIS wangjianqing
+ * @version 1.0.0 2015/3/26
+ */
+public class BdLbsManagerAdapter
+{
+	// type definition
+	public enum LbsMapDispMode
+	{
+		MAP_DISP_2D(0),
+		MAP_DISP_3D(1),
+		MAP_DISP_SATELLITE(2);
+		
+		private int mValue;
+		private LbsMapDispMode(int value)
+		{
+			mValue = value;
+		}
+		// get integer value method
+		public int value()
+		{
+			return mValue;
+		}
+		// convert integer value to enumerative value
+		public static LbsMapDispMode convEnumValue(int value)
+		{
+			LbsMapDispMode lbsMapDispMode;
+			
+			switch (value)
+			{
+			case 0:
+				lbsMapDispMode = MAP_DISP_2D;
+				break;
+				
+			case 1:
+				lbsMapDispMode = MAP_DISP_3D;
+				break;
+				
+			case 2:
+				lbsMapDispMode = MAP_DISP_SATELLITE;
+				break;
+				
+			default:
+				Log.e("LbsMapDisplayMode", "invalid integer value=[" + value + "] which can't be converted to DispMapDayNightMode enum value!");
+				lbsMapDispMode = MAP_DISP_2D;
+				break;
+			}
+			
+			return lbsMapDispMode;
+		}
+	}
+	
+	// interface declaration
+	public interface LbsManagerListener
+	{
+		public void onIsCCPOnMapCenterChanged(boolean isCCPOnMapCenter);
+		
+		public void onMapLocationModeChanged(LocationMode locationMode);
+	}
+	
+	// static variable
+	private static BdLbsManagerAdapter mBdLbsManagerAdapterInst;
+	
+	// member variable
+	private boolean mIsSDKInitialized;
+	private BaiduMap mBaiduMap;
+	private volatile boolean mIsCCPOnMapCenter;
+	private BDLocation mCurrLocation;
+	private LocationMode mCurrLocationMode;
+	private List<LbsManagerListener> mLbsManagerListeners;
+	
+	// constructor
+	private BdLbsManagerAdapter()
+	{
+		mIsSDKInitialized = false;
+		mBaiduMap = null;
+		mIsCCPOnMapCenter = true;
+		mCurrLocation = null;
+		mCurrLocationMode = LocationMode.NORMAL;
+		mLbsManagerListeners = new ArrayList<LbsManagerListener>(4);
+	}
+	
+	public synchronized static BdLbsManagerAdapter getInstance()
+	{
+		if (mBdLbsManagerAdapterInst == null)
+		{
+			mBdLbsManagerAdapterInst = new BdLbsManagerAdapter();
+		}
+		
+		return mBdLbsManagerAdapterInst;
+	}
+	
+	public boolean addLbsManagerListener(LbsManagerListener listener)
+	{
+		boolean ret = true;
+
+		try
+		{
+			if (listener == null)
+			{
+				ret = false;
+				return ret;
+			}
+			
+			synchronized (mLbsManagerListeners)
+			{
+				if (!mLbsManagerListeners.contains(listener))
+				{
+					mLbsManagerListeners.add(listener);
+				}
+			} // synchronized (mLbsManagerListeners)
+		}
+		catch (Exception ex)
+		{
+			System.err.println("Exception:" + ex.getMessage());
+			ex.printStackTrace();
+			ret = false;
+		}
+		
+		return ret;
+	}
+	
+	public boolean removeLbsManagerListener(LbsManagerListener listener)
+	{
+		boolean ret = true;
+		
+		try
+		{
+			if (listener == null)
+			{
+				ret = false;
+				return ret;
+			}
+			
+			synchronized (mLbsManagerListeners)
+			{
+				if (mLbsManagerListeners.contains(listener))
+				{
+					mLbsManagerListeners.remove(listener);
+				}
+			} // synchronized (mLbsManagerListeners)
+		}
+		catch (Exception ex)
+		{
+			System.err.println("Exception:" + ex.getMessage());
+			ex.printStackTrace();
+			ret = false;
+		}
+		
+		return ret;
+	}
+	
+	protected void triggerOnIsCCPOnMapCenterChanged(boolean isCCPOnMapCenter)
+	{
+		synchronized (mLbsManagerListeners)
+		{
+			for (int i = 0; i < mLbsManagerListeners.size(); i++)
+			{
+				LbsManagerListener listener = mLbsManagerListeners.get(i);
+				
+				try
+				{
+					listener.onIsCCPOnMapCenterChanged(isCCPOnMapCenter);
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+				}
+			} // i
+		} // synchronized (mLbsManagerListeners)
+	}
+	
+	protected void triggerOnMapLocationModeChanged(LocationMode locationMode)
+	{
+		synchronized (mLbsManagerListeners)
+		{
+			for (int i = 0; i < mLbsManagerListeners.size(); i++)
+			{
+				LbsManagerListener listener = mLbsManagerListeners.get(i);
+				
+				try
+				{
+					listener.onMapLocationModeChanged(locationMode);
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+				}
+			} // i
+		} // synchronized (mLbsManagerListeners)
+	}
+
+	public synchronized void initializeSDK(Context context)
+	{
+		if (!mIsSDKInitialized)
+		{
+			//在使用SDK各组件之前初始化context信息，传入ApplicationContext
+	        //注意该方法要再setContentView方法之前实现
+			SDKInitializer.initialize(context);
+			
+			mIsSDKInitialized = true;
+		}
+		else
+		{
+			Log.w(getClass().getSimpleName(), "SDKInitializer.initialize() has already been called!");
+		}
+	}
+	
+	public void setBaiduMap(BaiduMap baiduMap)
+	{
+		mBaiduMap = baiduMap;
+	}
+	
+	public BaiduMap getBaiduMap()
+	{
+		return mBaiduMap;
+	}
+	
+	public void showSatelliteMap(BaiduMap baiduMap)
+	{
+		baiduMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
+	}
+	
+	public void show2DMap(BaiduMap baiduMap)
+	{
+		baiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);  
+		//显示2D地图
+		int overlookAngle = Integer.parseInt("0");
+		MapStatus ms = new MapStatus.Builder(baiduMap.getMapStatus()).overlook(overlookAngle).build();
+		MapStatusUpdate u = MapStatusUpdateFactory.newMapStatus(ms);
+		baiduMap.animateMapStatus(u);
+	}
+	
+	public void show3DMap(BaiduMap baiduMap)
+	{
+		baiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);  
+		// 放大地图显示级别
+		MapStatusUpdate msu = MapStatusUpdateFactory.zoomTo(19.0f);
+		baiduMap.setMapStatus(msu);
+		//调整俯视度，显示3D地图
+		int overlookAngle = Integer.parseInt("-45");
+		MapStatus ms = new MapStatus.Builder(baiduMap.getMapStatus()).overlook(overlookAngle).build();
+		MapStatusUpdate u = MapStatusUpdateFactory.newMapStatus(ms);
+		baiduMap.animateMapStatus(u);
+	}
+	
+	public synchronized void resetFavoritedPoiMarkers(BaiduMap baiduMap, Context context, boolean isMandatory)
+	{
+//wy		try
+//		{
+//			MarkerManagerLogic markerManagerLogic = MarkerManagerLogic.getInstance();
+//			LbsDataAdapter lbsDataAdapter = new LbsDataAdapter(context);
+//			if (lbsDataAdapter.getFavoritedPoiSwitchFlag())
+//			{
+//				int count = markerManagerLogic.getCountOfTypeOfMarkers(UserMarkerType.MARKER_FAVORITED_POI);
+//				if (isMandatory && (count > 0))
+//				{
+//					markerManagerLogic.removeTypeOfMarkers(UserMarkerType.MARKER_FAVORITED_POI);
+//					count = markerManagerLogic.getCountOfTypeOfMarkers(UserMarkerType.MARKER_FAVORITED_POI);
+//				}
+//				if (count <= 0)
+//				{
+//					FavoriteAddrDbAdapter favoriteAddrDbAdapter = new FavoriteAddrDbAdapter(context);
+//					List<FavoriteAddrEntity> favoriteAddrList = favoriteAddrDbAdapter.selectAllFavoriteAddrs();
+//					
+//					favoriteAddrDbAdapter.dbClose();
+//					
+//					for (int i = 0; i < favoriteAddrList.size(); i++)
+//					{
+//						PoiInfoEx poiInfo = new PoiInfoEx(favoriteAddrList.get(i));
+//						markerManagerLogic.addMarker(baiduMap, poiInfo, UserMarkerType.MARKER_FAVORITED_POI, false);
+//					} // i
+//				}
+//			}
+//			else
+//			{
+//				markerManagerLogic.removeTypeOfMarkers(UserMarkerType.MARKER_FAVORITED_POI);
+//			}
+//		}
+//		catch (Exception ex)
+//		{
+//			ex.printStackTrace();
+//		}
+	}
+	
+	public boolean isCCPOnMapCenter()
+	{
+		return mIsCCPOnMapCenter;
+	}
+	
+	public void setIsCCPOnMapCenter(boolean b)
+	{
+		boolean tmpIsCCPOnMapCenter = mIsCCPOnMapCenter;
+		mIsCCPOnMapCenter = b;
+		if (mIsCCPOnMapCenter != tmpIsCCPOnMapCenter)
+		{
+			triggerOnIsCCPOnMapCenterChanged(mIsCCPOnMapCenter);
+		}
+	}
+	
+	public BDLocation getCurrLocation()
+	{
+		return mCurrLocation;
+	}
+	
+	public void setCurrLocation(BDLocation location)
+	{
+		mCurrLocation = location;
+	}
+	
+	public LocationMode getCurrLocationMode()
+	{
+		return mCurrLocationMode;
+	}
+	
+	public void setCurrLocationMode(LocationMode locationMode)
+	{
+		LocationMode tmpLocationMode = mCurrLocationMode;
+		mCurrLocationMode = locationMode;
+		if (mCurrLocationMode != tmpLocationMode)
+		{
+			triggerOnMapLocationModeChanged(locationMode);
+		}
+	}
+	
+	public void setTrafficEnabledFlag(BaiduMap baiduMap, boolean enabledFlag)
+	{
+		baiduMap.setTrafficEnabled(enabledFlag);
+	}
+}

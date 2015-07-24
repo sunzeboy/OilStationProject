@@ -1,0 +1,579 @@
+package cn.sh.changxing.ct.mobile.fragment.lbs;
+
+import android.content.Context;
+import android.graphics.Point;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+
+import com.baidu.location.BDLocation;
+import com.baidu.location.BDLocationListener;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
+import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.BaiduMap.OnMapClickListener;
+import com.baidu.mapapi.map.BaiduMap.OnMapLoadedCallback;
+import com.baidu.mapapi.map.BaiduMap.OnMapLongClickListener;
+import com.baidu.mapapi.map.BaiduMap.OnMapTouchListener;
+import com.baidu.mapapi.map.MapPoi;
+import com.baidu.mapapi.map.MapStatus;
+import com.baidu.mapapi.map.MapStatusUpdate;
+import com.baidu.mapapi.map.MapStatusUpdateFactory;
+import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.MyLocationConfiguration;
+import com.baidu.mapapi.map.MyLocationData;
+import com.baidu.mapapi.map.MyLocationConfiguration.LocationMode;
+import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.utils.DistanceUtil;
+
+import com.ionicframework.cnpcmobile317812.R;
+import cn.sh.changxing.ct.mobile.activity.LbsActivity;
+import cn.sh.changxing.ct.mobile.bdmap.adapter.BdLbsManagerAdapter;
+import cn.sh.changxing.ct.mobile.bdmap.adapter.entity.PoiInfoEx;
+import cn.sh.changxing.ct.mobile.comm.FragmentEx;
+//import cn.sh.changxing.ct.mobile.logic.lbs.GlobalEyesInfoLogic;
+//import cn.sh.changxing.ct.mobile.logic.lbs.MarkerManagerLogic;
+//import cn.sh.changxing.ct.mobile.logic.lbs.marker.UserMarkerType;
+// 暂时去除标记
+import cn.sh.changxing.ct.mobile.logic.lbs.SearchAroundPoiLogic;
+
+/**
+ * <b>Function Name：</b>实现MapView(地图视图)处理的Fragment<br>
+ * <b>History：</b>2015/3/26 wangjianqing create<br>
+ * <br>
+ *
+ * @author SIS wangjianqing
+ * @version 1.0.0 2015/3/26
+ */
+public class MapViewFragment extends FragmentEx
+{
+	// constant definition
+	private final static String KEY_NAME_OF_CURRENT_BDLOCATION = "MapViewFragment_CurrLocation";
+	
+	// member variable
+	// UI操作相关
+	private LbsActivity mLbsActivity;
+	// 业务操作相关
+	//private GlobalEyesInfoLogic mGlobalEyesInfoLogic; wy
+	// 地图操作相关
+	private BdLbsManagerAdapter mBdLbsManagerAdapter;
+	private MapView mMapView;
+	private BaiduMap mBaiduMap;
+	private Point mScaleControlPosition;
+	// 定位相关
+	private LocationClient mLocClient;
+	private BDLocationListenerImpl mBDLocationListenerImpl;
+	private SensorEventListenerImpl mSensorEventListenerImpl;
+	private OnMapClickListenerImpl mOnMapClickListenerImpl;
+	private OnMapLongClickListenerImpl mOnMapLongClickListenerImpl;
+	//private BitmapDescriptor mPicMarkerOfCCP;
+	private boolean mIsFirstLoc = true;	// 是否首次定位
+	private SearchAroundPoiLogic mSearchAroundPoiLogic;
+ 
+	
+	public MapViewFragment()
+	{
+		mBdLbsManagerAdapter = BdLbsManagerAdapter.getInstance();
+		//mGlobalEyesInfoLogic = GlobalEyesInfoLogic.getInstance();
+		//??
+		//mGlobalEyesInfoLogic.startGeyeListTask();
+		//??
+	}
+	
+	// 删除在MapView中表示的Baidu Logo的图片对象
+	private void deleteBdmapLogoView()
+	{
+		int childCount = mMapView.getChildCount();
+		for (int i = 0; i < childCount; i++)
+		{
+			View view = mMapView.getChildAt(i);
+			if (view instanceof ImageView)
+			{
+				view.setVisibility(View.GONE);
+			}
+		}
+	}
+	
+	private void getBdMapObjects()
+	{
+		// 获取地图控件引用
+		if (mMapView == null)
+		{
+			mMapView = (MapView) mLbsActivity.findViewById(R.id.bmapView);
+			if (mMapView != null)
+			{
+				// 取得BaiduMap对象的引用
+				mBaiduMap = mMapView.getMap();
+				// 设定BaiduMap对象的引用
+				mBdLbsManagerAdapter.setBaiduMap(mBaiduMap);
+			}
+		}
+	}
+	
+	private void getControlObjects()
+	{
+		mLbsActivity = (LbsActivity) getActivity();
+		mSearchAroundPoiLogic = SearchAroundPoiLogic.getInstance(mActivity);
+		// 获取地图控件引用
+		getBdMapObjects();
+	}
+	
+	private void sercherFillingStation(LatLng latlng){
+		
+		mSearchAroundPoiLogic.clearData();
+		mSearchAroundPoiLogic.sercherFillingStation(0, true, latlng);
+		
+	}
+	
+	private void setControlObjects()
+	{
+		//mBaiduMap.setOnMarkerClickListener(MarkerManagerLogic.getInstance().getOnMarkerClickListener());
+		
+		mBaiduMap.setOnMapTouchListener(new OnMapTouchListener()
+		{
+			
+			@Override
+			public void onTouch(MotionEvent event)
+			{
+				if (event.getAction() == MotionEvent.ACTION_MOVE)
+				{
+					handlerMapMoveEvent();
+				}
+				
+				//??
+//				BDLocation location = mBdLbsManagerAdapter.getCurrLocation();
+//				Log.i(getClass().getSimpleName(), "onTouch(): call GlobalEyesInfoLogic.setRequest CityName=[" + location.getCity() + "]");
+//				mGlobalEyesInfoLogic.setRequest(location.getCity());
+//				
+//				//??mGlobalEyesInfoLogic.setRequest("福州市");
+				//??
+			}
+		});
+		mBaiduMap.setOnMapLoadedCallback(new OnMapLoadedCallback()
+		{
+			@Override
+			public void onMapLoaded()
+			{
+				if ((mMapView != null) && (mScaleControlPosition != null))
+				{
+					mMapView.setScaleControlPosition(mScaleControlPosition);
+				}
+			}	
+		});
+		
+		// 隐藏百度自带的放大缩小按钮
+		mMapView.showZoomControls(false);
+		// 删除百度地图Logo
+		deleteBdmapLogoView();
+		// 设置地图点击事件监听处理对象
+		mBaiduMap.setOnMapClickListener(mOnMapClickListenerImpl);
+		// 设置地图长按事件监听处理对象
+		mBaiduMap.setOnMapLongClickListener(mOnMapLongClickListenerImpl);
+		// 将POI收藏点的Marker对象初始化到百度地图上
+		mBdLbsManagerAdapter.resetFavoritedPoiMarkers(mBaiduMap, mLbsActivity.getApplicationContext(), true);
+	}
+
+	// 定位初始化的处理流程
+	private void initLocation(Bundle savedInstanceState)
+	{
+		// 尝试恢复上次MapViewFragment被Destroy时最后一次定位成功的自车位置（如未定位成功的话则忽略该处理）
+		if (savedInstanceState != null)
+		{
+			BDLocation location = savedInstanceState.getParcelable(KEY_NAME_OF_CURRENT_BDLOCATION);
+			if (location != null)
+			{
+				if (mBDLocationListenerImpl != null)
+				{
+					mBDLocationListenerImpl.onReceiveLocation(location);
+				}
+			}
+		}
+		
+		// 初始化定位图层显示方式为[普通态： 更新定位数据时不对地图做任何操作]
+		mBdLbsManagerAdapter.setCurrLocationMode(LocationMode.NORMAL);
+		// 开启定位图层
+		mBaiduMap.setMyLocationEnabled(true);
+//		// 设置自车图标
+//		mPicMarkerOfCCP =
+//				BitmapDescriptorFactory.fromResource(R.drawable.pic_mark_ccp_bg);
+		// 设置定位图层显示方式
+		LocationMode currLocationMode = mBdLbsManagerAdapter.getCurrLocationMode();
+		mBaiduMap.setMyLocationConfigeration(
+				new MyLocationConfiguration(currLocationMode, true, null));
+
+		// 定位初始化
+		mLocClient = new LocationClient(mLbsActivity);
+		mLocClient.registerLocationListener(mBDLocationListenerImpl);
+		LocationClientOption option = new LocationClientOption();
+		option.setOpenGps(true); 		// 打开gps
+		option.setCoorType("bd09ll"); 	// 设置坐标类型
+		option.setScanSpan(1000); 		// 设置扫描间隔，单位是毫秒
+		mLocClient.setLocOption(option);
+		mLocClient.start();
+	}
+	
+	/**
+	 * 地图移动改变locationMode
+	 */
+	public void handlerMapMoveEvent()
+	{
+		mBdLbsManagerAdapter.setIsCCPOnMapCenter(false);
+		mBdLbsManagerAdapter.setCurrLocationMode(LocationMode.NORMAL);
+
+		mBaiduMap.setMyLocationConfigeration(
+				new MyLocationConfiguration(
+					mBdLbsManagerAdapter.getCurrLocationMode(),
+					true, null));
+	}
+	
+	public void setScalePosition(float x, float y)
+	{
+		mScaleControlPosition = new Point((int)x, (int)y);
+//		mMapView.showScaleControl(false);
+//		mMapView.setScaleControlPosition(mScaleControlPosition);
+//		mMapView.showScaleControl(true);
+	}
+	
+	public void setCompassPosition(Point p)
+	{
+		if (mBaiduMap != null)
+		{
+			mBaiduMap.getUiSettings().setCompassPosition(p);
+		}
+	}
+	
+	public void switchLocationMode()
+	{
+		BDLocation currLocation = mBdLbsManagerAdapter.getCurrLocation();
+		if (currLocation == null)
+		{
+			Log.w(getClass().getSimpleName(), "switchLocationMode():location is null!");
+			return;
+		}
+		
+		LatLng ll = new LatLng(currLocation.getLatitude(),
+							   currLocation.getLongitude());
+		
+		MapStatus mapStatus = new MapStatus.Builder().overlook(0).rotate(0)
+				.target(ll).build();
+		
+		if (!mBdLbsManagerAdapter.isCCPOnMapCenter())
+		{
+			mBdLbsManagerAdapter.setCurrLocationMode(LocationMode.NORMAL);
+			mBdLbsManagerAdapter.setIsCCPOnMapCenter(true);
+		}
+		else if (mBdLbsManagerAdapter.getCurrLocationMode() == LocationMode.NORMAL)
+		{
+			mBdLbsManagerAdapter.setCurrLocationMode(LocationMode.COMPASS);
+		}
+		else
+		{
+			mBdLbsManagerAdapter.setCurrLocationMode(LocationMode.NORMAL);
+		}
+		
+		MapStatusUpdate update = MapStatusUpdateFactory.newMapStatus(mapStatus);
+		mBaiduMap.animateMapStatus(update);
+		// 设置定位图层显示方式
+		mBaiduMap.setMyLocationConfigeration(
+					new MyLocationConfiguration(
+						mBdLbsManagerAdapter.getCurrLocationMode(),
+						true, null));
+	}
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+		
+		mBDLocationListenerImpl = new BDLocationListenerImpl();
+		mSensorEventListenerImpl = new SensorEventListenerImpl(getActivity());
+		mOnMapClickListenerImpl = new OnMapClickListenerImpl();
+		mOnMapLongClickListenerImpl = new OnMapLongClickListenerImpl();
+	}
+	
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState)
+	{
+		View view = inflater.inflate(R.layout.fragment_lbs_map_view, container, false);
+		
+		return view;
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState)
+	{
+		super.onSaveInstanceState(outState);
+		
+		if (mBdLbsManagerAdapter != null)
+		{
+			BDLocation location = mBdLbsManagerAdapter.getCurrLocation();
+			if (location != null)
+			{
+				outState.putParcelable(KEY_NAME_OF_CURRENT_BDLOCATION, location);
+			}
+		}
+	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState)
+	{
+		super.onActivityCreated(savedInstanceState);
+
+		getControlObjects();
+		setControlObjects();
+		initLocation(savedInstanceState);
+	}
+
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+
+		// 在activity执行onResume时执行mMapView.onResume()，实现地图生命周期管理
+		mMapView.onResume();
+	}
+
+	@Override
+	public void onPause()
+	{
+		super.onPause();
+
+		// 在activity执行onPause时执行mMapView.onPause()，实现地图生命周期管理
+		mMapView.onPause();
+	}
+
+	@Override
+	public void onDestroy()
+	{
+		super.onDestroy();
+
+		// 退出时销毁定位
+		mLocClient.stop();
+		// 关闭定位图层
+		mBaiduMap.setMyLocationEnabled(false);
+		// 在activity执行onDestroy时执行mMapView.onDestroy()，实现地图生命周期管理
+		mMapView.onDestroy();
+		// 清除BaiduMap对象的引用
+		mBdLbsManagerAdapter.setBaiduMap(null);
+	}
+
+	public MapView getMapView()
+	{
+		// 获取地图控件引用
+		getBdMapObjects();
+		
+		return mMapView;
+	}
+
+	public BaiduMap getBaiduMap()
+	{
+		// 获取地图控件引用
+		getBdMapObjects();
+		
+		return mMapView.getMap();
+	}
+	
+	public String getCurrCity()
+	{
+		BDLocation currLocation = mBdLbsManagerAdapter.getCurrLocation();
+		if (currLocation != null)
+		{
+			return currLocation.getCity();
+		}
+		return null;
+	}
+	
+	public BDLocation getCurrLocation()
+	{
+		return mBdLbsManagerAdapter.getCurrLocation();
+	}
+	
+	/**
+	 * 定位SDK监听函数
+	 */
+	private class BDLocationListenerImpl implements BDLocationListener
+	{
+		@Override
+		public void onReceiveLocation(BDLocation location)
+		{
+			try
+			{
+				// map view 销毁后不在处理新接收的位置
+				if (location == null || mMapView == null || mBaiduMap == null)
+				{
+					return;
+				}
+				float direction = 0.0f;
+	//			Log.i(getClass().getSimpleName(), "location.getDirection()=[" + location.getDirection() + "]");
+	//			Log.i(getClass().getSimpleName(), "SensorEventListenerImpl.getHeadingAngle()=[" + mSensorEventListenerImpl.getHeadingAngle() + "]");
+				
+				mBdLbsManagerAdapter.setCurrLocation(location);
+				
+				if (location.getDirection() > 0.0f)
+				{
+					direction = location.getDirection();
+				}
+				else if (mSensorEventListenerImpl.getHeadingAngle() > 0.0f)
+				{
+					direction = mSensorEventListenerImpl.getHeadingAngle();
+				}
+				MyLocationData locData = new MyLocationData.Builder()
+						.accuracy(location.getRadius())
+						// 此处设置开发者获取到的方向信息，顺时针0-360
+						.direction(direction).latitude(location.getLatitude())
+						.longitude(location.getLongitude()).build();
+				mBaiduMap.setMyLocationData(locData);
+				if (mIsFirstLoc)
+				{
+					mIsFirstLoc = false;
+					LatLng ll = new LatLng(location.getLatitude(),
+							location.getLongitude());
+					MapStatusUpdate u = MapStatusUpdateFactory.newLatLng(ll);
+					mBaiduMap.animateMapStatus(u);
+					
+					// 第一次启动默认搜索周围的中国石油加油站
+					sercherFillingStation(ll);
+				}
+			}
+			catch (Exception ex)
+			{
+				System.err.println("Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+	
+	/**
+	 * Android设备的传感器event监听函数
+	 */
+	private class SensorEventListenerImpl implements SensorEventListener
+	{
+		// member variable
+		float mHeadingAngle = 0.0f;
+		long mPreMilliSecond = 0;
+		
+		public SensorEventListenerImpl(Context context)
+		{
+			 // 传感器管理器  
+	        SensorManager sm = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+	        // 注册传感器(Sensor.TYPE_ORIENTATION(方向传感器);
+	        sm.registerListener(this,  
+	                sm.getDefaultSensor(Sensor.TYPE_ORIENTATION),  
+	                SensorManager.SENSOR_DELAY_NORMAL);
+		}
+		
+		public float getHeadingAngle()
+		{
+			return mHeadingAngle;
+		}
+
+		@Override
+		public void onAccuracyChanged(Sensor sensor, int accuracy)
+		{
+			// TODO Auto-generated method stub
+			
+		}	
+		
+		@Override
+		public void onSensorChanged(SensorEvent event)
+		{
+			if (event.sensor.getType() == Sensor.TYPE_ORIENTATION)
+			{
+				long curMilliSecond = System.currentTimeMillis();
+				if ((mHeadingAngle != event.values[0]) &&
+					((curMilliSecond - mPreMilliSecond) > 1000) &&
+					(curMilliSecond > mPreMilliSecond))
+				{
+					mHeadingAngle = event.values[0];
+					mPreMilliSecond = curMilliSecond;
+					
+					MyLocationData curLocData = mBaiduMap.getLocationData();
+					if (curLocData != null)
+					{
+						MyLocationData locData = new MyLocationData.Builder()
+							.accuracy(curLocData.accuracy)
+							// 此处设置开发者获取到的方向信息，顺时针0-360
+							.direction(mHeadingAngle).latitude(curLocData.latitude)
+							.longitude(curLocData.longitude).build();
+						mBaiduMap.setMyLocationData(locData);
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 地图点击事件监听
+	 */
+	private class OnMapClickListenerImpl implements OnMapClickListener
+	{
+		@Override
+		public void onMapClick(LatLng ll)
+		{
+			mLbsActivity.getMapOperFragment().resetSubViewLayers();
+		}
+
+		@Override
+		public boolean onMapPoiClick(MapPoi mapPoi)
+		{
+			// create POI info object
+			PoiInfoEx poiInfoEx = PoiInfoEx.createPrePoiInfoExOfMapPoi(mapPoi);
+			// add marker object
+			//wy MarkerManagerLogic markerManagerLogic = MarkerManagerLogic.getInstance();
+			//wy markerManagerLogic.addMarker(mBaiduMap, poiInfoEx, UserMarkerType.MARKER_MAP_POI, true);
+			// jump to map POI
+			MapStatus mapStatus = new MapStatus.Builder().target(poiInfoEx.location).build();
+			MapStatusUpdate update = MapStatusUpdateFactory.newMapStatus(mapStatus);
+			mBaiduMap.animateMapStatus(update);
+			// open POI info pop up bar view layer
+			mLbsActivity.getMapOperFragment().openPoiInfoPopupBar(poiInfoEx);
+
+			return true;
+		}
+	}
+	
+	/**
+	 * 地图长按事件监听
+	 */
+	private class OnMapLongClickListenerImpl implements OnMapLongClickListener
+	{
+		@Override
+		public void onMapLongClick(LatLng ll)
+		{
+			// create POI info object
+			PoiInfoEx poiInfoEx = PoiInfoEx.createPrePoiInfoExOfGeo(ll);
+			// add marker object
+			//wy MarkerManagerLogic markerManagerLogic = MarkerManagerLogic.getInstance();
+			//wy markerManagerLogic.addMarker(mBaiduMap, poiInfoEx, UserMarkerType.MARKER_MAP_POI, true);
+			// jump to map POI
+			MapStatus mapStatus = new MapStatus.Builder().target(poiInfoEx.location).build();
+			MapStatusUpdate update = MapStatusUpdateFactory.newMapStatus(mapStatus);
+			mBaiduMap.animateMapStatus(update);
+			// open POI info pop up bar view layer
+			mLbsActivity.getMapOperFragment().openPoiInfoPopupBar(poiInfoEx);
+		}
+	}
+	
+	public double getDistance(LatLng endLatlng) {
+		try {
+			LatLng startLatlng = new LatLng(getBaiduMap().getLocationData().latitude,
+					getBaiduMap().getLocationData().longitude);
+			double result = DistanceUtil.getDistance(startLatlng, endLatlng);
+			return  (Math.round(result/100d)/10d) ;
+		} catch (Exception e) {
+			
+		}
+		return 0;
+	}
+	
+	
+}

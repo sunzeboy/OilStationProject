@@ -1,0 +1,22 @@
+//
+//  Constants.h
+//  GasStationAPP
+//
+//  Created by sunze on 15/6/15.
+//  Copyright (c) 2015年 sunze. All rights reserved.
+//
+
+#ifndef GasStationAPP_Constants_h
+#define GasStationAPP_Constants_h
+
+#define kWidth self.view.bounds.size.width
+#define kHeight self.view.bounds.size.height
+#define kLuKuangTraillingSpace 10
+#define kLuKuangWidth 50
+#define kLuKuangTopToSpace 80
+#define kLuTuSpace 10
+#define kLuPIC @"u12.png"
+#define kZoomWidth 40
+#define kZoomBottomSpace 140
+
+#endif

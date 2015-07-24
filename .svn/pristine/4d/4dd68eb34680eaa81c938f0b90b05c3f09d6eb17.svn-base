@@ -1,0 +1,175 @@
+package cn.sh.changxing.ct.mobile.comm;
+
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.util.Log;
+
+/**
+ * <b>Function Name：</b>dialog base class<br>
+ * <b>History：</b>2013/2/18 wangjianqing create<br>
+ * <br>
+ *
+ * @author SIS wangjianqing
+ * @version 1.0.0 2013/2/18
+ */
+public class DialogEx extends Dialog
+		implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener
+{
+	// string for logging the class name
+	protected final String LOG_TAG = getClass().getSimpleName();
+	protected final static boolean isLog = true;
+	protected Context mContext;
+	protected IDialogExListener mDialogExListener;
+	
+	public DialogEx(Context context)
+	{
+		super(context);
+		
+		mContext = context;
+		setCancelable(false);
+	}
+	
+	public DialogEx(Context context, int theme)
+	{
+		super(context, theme);
+		
+		mContext = context;
+		setCancelable(false);
+	}
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState)
+	{
+		try
+		{
+			super.onCreate(savedInstanceState);
+			
+			setOnCancelListener(this);
+			setOnDismissListener(this);
+			
+			if (isLog)
+	        {
+	        	Log.i(LOG_TAG, "onCreate()");
+	        }
+		}
+		catch (Exception ex)
+		{
+			System.err.println(LOG_TAG + " Exception:" + ex.getMessage());
+			ex.printStackTrace();
+		}
+	}
+
+	@Override
+	protected void onStart()
+	{
+		try
+		{
+			super.onStart();
+			
+			if (isLog)
+			{
+				Log.i(LOG_TAG, "onStart()");
+			}
+		}
+		catch (Exception ex)
+		{
+			System.err.println(LOG_TAG + " Exception:" + ex.getMessage());
+			ex.printStackTrace();
+		}
+	}
+	
+	@Override
+	protected void onStop()
+	{
+		try
+		{
+			super.onStop();
+			
+			if (isLog)
+			{
+				Log.i(LOG_TAG, "onStop()");
+			}
+		}
+		catch (Exception ex)
+		{
+			System.err.println(LOG_TAG + " Exception:" + ex.getMessage());
+			ex.printStackTrace();
+		}
+	}
+	
+	@Override
+	public void onBackPressed()
+	{
+		try
+		{
+			super.onBackPressed();
+			
+			cancel();
+			
+			if (isLog)
+			{
+				Log.i(LOG_TAG, "onBackPressed()");
+			}
+		}
+		catch (Exception ex)
+		{
+			System.err.println(LOG_TAG + " Exception:" + ex.getMessage());
+			ex.printStackTrace();
+		}
+	}
+
+	@Override
+	public void onCancel(DialogInterface dialog)
+	{
+		try
+		{
+			dialog.cancel();
+			
+			if (isLog)
+			{
+				Log.i(LOG_TAG, "onCancel()");
+			}
+		}
+		catch (Exception ex)
+		{
+			System.err.println(LOG_TAG + " Exception:" + ex.getMessage());
+			ex.printStackTrace();
+		}
+	}
+
+	@Override
+	public void onDismiss(DialogInterface dialog)
+	{
+		try
+		{
+			dialog.dismiss();
+			
+			if (mDialogExListener != null)
+			{
+				mDialogExListener.onDialogClose();
+			}
+			setDialogExListener(null);
+			
+//			Resources resources = Resources.getSystem();
+//			resources.flushLayoutCache();
+//			System.gc();
+			
+			if (isLog)
+			{
+				Log.i(LOG_TAG, "onDismiss()");
+			}
+		}
+		catch (Exception ex)
+		{
+			System.err.println(LOG_TAG + " Exception:" + ex.getMessage());
+			ex.printStackTrace();
+		}
+	}
+	
+	public void setDialogExListener(IDialogExListener listener)
+	{
+		mDialogExListener = listener;
+	}
+}

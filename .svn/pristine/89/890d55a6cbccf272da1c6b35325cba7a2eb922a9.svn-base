@@ -1,0 +1,331 @@
+package cn.sh.changxing.ct.mobile.bdmap.adapter.entity;
+
+import java.io.Serializable;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.search.poi.PoiDetailResult;
+
+
+/** 
+ * @ClassName: PoiInfoDetailEx 
+ * @Description:TODO(PoiInfoDetail entity) 
+ * @author 康军
+ * @date 2015年4月24日 上午11:15:53 
+ */
+	
+public class PoiInfoDetailEx implements Serializable, Parcelable
+{
+	private static final long serialVersionUID = 5374172761542288357L;
+
+    /**
+     * 获取 poi 地址
+     */
+    private String address;
+    /**
+     * 获取 poi 签到数量
+     */
+    private int checkinNum;
+    /**
+     * 获取 poi 评论数量
+     */
+    private int commentNum;
+    /**
+     * 获取 poi 详情 url
+     */
+    private String detailUrl;
+    /**
+     * 获取 poi 环境评价
+     */
+    private double environmentRating;
+    /**
+     * 获取 poi 设施评价-
+     */
+    private double facilityRating;
+    /**
+     * 获取 poi 喜欢数量
+     */
+    private int favoriteNum;
+    /**
+     * 获取 poi 团购数量
+     */
+    private int grouponNum;
+    /**
+     * 获取 poi 卫生评价
+     */
+    private double hygieneRating;
+    /**
+     * 获取 poi 图片数量
+     */
+    private int imageNum;
+    /**
+     * 获取 poi 位置
+     */
+    private LatLng location;
+    /**
+     * 获取 poi 名称
+     */
+    private String poiName;
+    /**
+     * 获取 poi 综合评价
+     */
+    private double overallRating;
+    /**
+     * 获取 poi 价格
+     */
+    private double price;
+    /**
+     * 获取 poi 服务评价
+     */
+    private double serviceRating;
+    /**
+     * 获取 poi 营业时间
+     */
+    private String shopHours;
+    /**
+     * 获取 poi 标签
+     */
+    private String tag;
+    /**
+     * 获取 poi 口味评价
+     */
+    private double tasteRating;
+    /**
+     * 获取 poi 技术评价
+     */
+    private double technologyRating;
+    /**
+     * 获取 poi 电话
+     */
+    private String telephone;
+    /**
+     * 获取 poi 类型， "hotel", "cater", "life"
+     */
+    private String poiType;
+    /**
+     * 获取 poi 的 uid
+     */
+    private String uid;
+	
+	public PoiInfoDetailEx(PoiDetailResult result){
+		this.address=result.getAddress();
+		this.checkinNum=result.getCheckinNum();
+		this.commentNum=result.getCommentNum();
+		this.detailUrl=result.getDetailUrl();
+		this.environmentRating=result.getEnvironmentRating();
+		this.facilityRating=result.getFacilityRating();
+		this.favoriteNum=result.getFavoriteNum();
+		this.grouponNum=result.getGrouponNum();
+		this.hygieneRating=result.getHygieneRating();
+		this.imageNum=result.getImageNum();
+		this.location=result.getLocation();
+		this.overallRating=result.getOverallRating();
+		this.poiName=result.getName();
+		this.poiType=result.getType();
+		this.price=result.getPrice();
+		this.serviceRating=result.getServiceRating();
+		this.shopHours=result.getShopHours();
+		this.tag=result.getTag();
+		this.tasteRating=result.getTasteRating();
+		this.technologyRating=result.getTechnologyRating();
+		this.telephone=result.getTelephone();
+		this.uid=result.getUid();
+	}
+	public String getAddress() {
+		return address;
+	}
+	public int getCheckinNum() {
+		return checkinNum;
+	}
+	public int getCommentNum() {
+		return commentNum;
+	}
+	public String getDetailUrl() {
+		return detailUrl;
+	}
+	public double getEnvironmentRating() {
+		return environmentRating;
+	}
+	public double getFacilityRating() {
+		return facilityRating;
+	}
+	public int getFavoriteNum() {
+		return favoriteNum;
+	}
+	public int getGrouponNum() {
+		return grouponNum;
+	}
+	public double getHygieneRating() {
+		return hygieneRating;
+	}
+	public int getImageNum() {
+		return imageNum;
+	}
+	public LatLng getLocation() {
+		return location;
+	}
+	public String getPoiName() {
+		return poiName;
+	}
+	public double getOverallRating() {
+		return overallRating;
+	}
+	public double getPrice() {
+		return price;
+	}
+	public double getServiceRating() {
+		return serviceRating;
+	}
+	public String getShopHours() {
+		return shopHours;
+	}
+	public String getTag() {
+		return tag;
+	}
+	public double getTasteRating() {
+		return tasteRating;
+	}
+	public double getTechnologyRating() {
+		return technologyRating;
+	}
+	public String getTelephone() {
+		return telephone;
+	}
+	public String getPoiType() {
+		return poiType;
+	}
+	public String getUid() {
+		return uid;
+	}
+	
+	////////////////////////////////for implementing Parcelable interface ////////////////////////////////
+	
+	@Override
+	public int describeContents()
+	{
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+	@Override
+	public void writeToParcel(Parcel dest, int flags)
+	{
+	  //poiDetail 地址
+	  dest.writeString(address);
+	  //poiDetail 签到数量
+	  dest.writeInt(checkinNum);
+	  //poiDetail 评论数量
+	  dest.writeInt(commentNum);
+	  //poiDetail 详情 url
+	  dest.writeString(detailUrl);
+	  //poiDetail 环境评价
+	  dest.writeDouble(environmentRating);
+	  //poiDetail 设施评价
+	  dest.writeDouble(facilityRating);
+	  //poiDetail 喜欢数量
+	  dest.writeInt(favoriteNum);
+	  //poiDetail 团购数量
+	  dest.writeInt(grouponNum);
+	  //poiDetail 卫生评价
+	  dest.writeDouble(hygieneRating);
+	  //poiDetail 图片数量
+	  dest.writeInt(imageNum);
+	  //poiDetail纬度
+	  dest.writeDouble(location.latitude);
+	  //poiDetail经度
+	  dest.writeDouble(location.longitude);
+	  //poiDetail 名称
+	  dest.writeString(poiName);
+	  //poiDetail 综合评价
+	  dest.writeDouble(overallRating);
+	  //poiDetail 价格
+	  dest.writeDouble(price);
+	  //poiDetail 服务评价
+	  dest.writeDouble(serviceRating);
+	  //poiDetail 营业时间
+	  dest.writeString(shopHours);
+	  //poiDetail 标签
+	  dest.writeString(tag);
+	  // poiDetail 口味评价
+	  dest.writeDouble(tasteRating);
+	  //poiDetail 技术评价
+	  dest.writeDouble(technologyRating);
+	  //poiDetail 电话
+	  dest.writeString(telephone);
+	  //poiDetail 类型， "hotel", "cater", "life"
+	  dest.writeString(poiType);
+	  //poiDetail 的 uid
+	  dest.writeString(uid);
+	}
+	
+	public static final Parcelable.Creator<PoiInfoDetailEx> CREATOR = new Parcelable.Creator<PoiInfoDetailEx>()
+    {
+        @Override
+        public PoiInfoDetailEx[] newArray(int size)
+        {
+            return new PoiInfoDetailEx[size];
+        }
+        
+        @Override
+        public PoiInfoDetailEx createFromParcel(Parcel in)
+        {
+            return new PoiInfoDetailEx(in);
+        }
+    };
+    
+    public PoiInfoDetailEx(Parcel in)
+    {
+      //poiDetail 地址
+      address=in.readString();
+      //poiDetail 签到数量
+      checkinNum=in.readInt();
+      //poiDetail 评论数量
+      commentNum=in.readInt();
+      //poiDetail 详情 url
+      detailUrl=in.readString();
+      //poiDetail 环境评价
+      environmentRating=in.readDouble();
+      //poiDetail 设施评价
+      facilityRating=in.readDouble();
+      //poiDetail 喜欢数量
+      favoriteNum=in.readInt();
+      //poiDetail 团购数量
+      grouponNum=in.readInt();
+      //poiDetail 卫生评价
+      hygieneRating=in.readDouble();
+      //poiDetail 图片数量
+      imageNum=in.readInt();
+      //poiDetail纬度
+      double latitude=in.readDouble();
+      //poiDetail经度
+      double longitude=in.readDouble();
+      //location object
+      location = new LatLng(latitude, longitude);
+      //poiDetail 名称
+      poiName=in.readString();
+      //poiDetail 综合评价
+      overallRating=in.readDouble();
+      //poiDetail 价格
+      price=in.readDouble();
+      //poiDetail 服务评价
+      serviceRating=in.readDouble();
+      //poiDetail 营业时间
+      shopHours=in.readString();
+      //poiDetail 标签
+      tag=in.readString();
+      // poiDetail 口味评价
+      tasteRating=in.readDouble();
+      //poiDetail 技术评价
+      technologyRating=in.readDouble();
+      //poiDetail 电话
+      telephone=in.readString();
+      //poiDetail 类型， "hotel", "cater", "life"
+      poiType=in.readString();
+      //poiDetail 的 uid
+      uid=in.readString();
+    }
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
+}

@@ -1,0 +1,94 @@
+package cn.sh.changxing.ct.mobile.view.lbs.broadcast;
+
+import java.util.ArrayList;
+
+import com.baidu.mapapi.map.BaiduMap;
+
+import cn.sh.changxing.ct.mobile.activity.LbsActivity;
+
+import cn.sh.changxing.ct.mobile.bdmap.adapter.entity.PoiInfoEx;
+import cn.sh.changxing.ct.mobile.logic.lbs.MarkerManagerLogic;
+import cn.sh.changxing.ct.mobile.logic.lbs.SearchAroundPoiLogic;
+import cn.sh.changxing.ct.mobile.logic.lbs.marker.IndexMarkerType;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+
+public class SearchResultBroadcastReceiver extends BroadcastReceiver {
+
+	private static final int MSG_TYPE_SHOW_MARKER = 100;
+	private static final int MSG_TYPE_SHOW_GAS_STATION_INFOR = 101;
+
+	private LbsActivity mActivity;
+
+	public SearchResultBroadcastReceiver(LbsActivity activity) {
+		mActivity = activity;
+	}
+
+	public void registerReceiver() {
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(SearchAroundPoiLogic.ACTION_SEARCH_AROUND_FINISH);
+		filter.addAction(IndexMarkerType.ACTION_MARKER_CLICK);
+		mActivity.registerReceiver(this, filter);
+	}
+
+	public void unregisterReceiver() {
+		mActivity.unregisterReceiver(this);
+	}
+
+	private Handler mHandler = new Handler() {
+		@Override
+		public void dispatchMessage(Message msg) {
+
+			if (msg.what == MSG_TYPE_SHOW_MARKER) {
+				BaiduMap mBaiduMap = mActivity.getMapViewFragment().getBaiduMap();
+				ArrayList<PoiInfoEx> listPoiInfoEx = SearchAroundPoiLogic
+						.getInstance(mActivity).getListPoiInfoEx();
+				if (listPoiInfoEx != null && listPoiInfoEx.size() != 0) {
+					MarkerManagerLogic.getInstance().showSearchListMarker(mBaiduMap, listPoiInfoEx);
+					
+				}
+
+			}else if(msg.what == MSG_TYPE_SHOW_GAS_STATION_INFOR){
+				mActivity.getMapOperFragment().showMapMenuBar(true);
+				// 显示数据
+				mActivity.getMapOperFragment().updateUI((PoiInfoEx)msg.obj);
+			}
+		}
+	};
+
+	private void sendMessageToHandler(int what,Object obj) {
+		Message msg = Message.obtain();
+		msg.what = what;
+		msg.obj = obj;
+		mHandler.sendMessage(msg);
+	}
+
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		if (intent == null || intent.getAction() == null) {
+			return;
+		}
+
+		String strAction = intent.getAction();
+		if (strAction.equals(SearchAroundPoiLogic.ACTION_SEARCH_AROUND_FINISH)) {
+			sendMessageToHandler(MSG_TYPE_SHOW_MARKER,null);
+
+		}else if(strAction.equals(IndexMarkerType.ACTION_MARKER_CLICK)) {
+			
+			Bundle bundle = intent.getBundleExtra("bundle");
+			if(bundle == null){
+				return;
+			}
+			PoiInfoEx poiInfoEx = (PoiInfoEx)bundle.getParcelable("PoiInfoEx");
+			sendMessageToHandler(MSG_TYPE_SHOW_GAS_STATION_INFOR,poiInfoEx);
+
+		} 
+
+	}
+
+}

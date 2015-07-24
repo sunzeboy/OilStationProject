@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="7706" systemVersion="14A389" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="69" id="y0B-fv-yO0" customClass="CustomTypeCell">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="69"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="y0B-fv-yO0" id="NEO-dH-ziO">
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="类别" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3Tx-Ea-Uc1">
+                        <rect key="frame" x="18" y="9" width="200" height="50"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="50" id="VIi-sS-fcI"/>
+                            <constraint firstAttribute="width" constant="200" id="nds-bE-hRh"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="20"/>
+                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="ppB-YQ-YDn">
+                        <rect key="frame" x="308" y="18" width="51" height="31"/>
+                        <color key="onTintColor" red="1" green="0.3773913987931321" blue="0.3672212318974617" alpha="1" colorSpace="calibratedRGB"/>
+                        <connections>
+                            <action selector="switchBtn:" destination="y0B-fv-yO0" eventType="valueChanged" id="zES-xa-Nxc"/>
+                        </connections>
+                    </switch>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="3Tx-Ea-Uc1" firstAttribute="top" secondItem="NEO-dH-ziO" secondAttribute="topMargin" constant="15" id="3e4-jh-Vl5"/>
+                    <constraint firstAttribute="centerY" secondItem="3Tx-Ea-Uc1" secondAttribute="centerY" constant="0.5" id="BmN-a2-8vh"/>
+                    <constraint firstItem="3Tx-Ea-Uc1" firstAttribute="leading" secondItem="NEO-dH-ziO" secondAttribute="leadingMargin" constant="10" id="CNa-gP-M7e"/>
+                    <constraint firstAttribute="centerY" secondItem="ppB-YQ-YDn" secondAttribute="centerY" id="LsV-rT-LyY"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="ppB-YQ-YDn" secondAttribute="trailing" constant="10" id="xt9-rg-ir5"/>
+                </constraints>
+                <variation key="default">
+                    <mask key="constraints">
+                        <exclude reference="3e4-jh-Vl5"/>
+                    </mask>
+                </variation>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="switchBtn" destination="ppB-YQ-YDn" id="BuY-hN-4YU"/>
+                <outlet property="typeLabel" destination="3Tx-Ea-Uc1" id="xIo-CT-R28"/>
+            </connections>
+            <point key="canvasLocation" x="683.5" y="454.5"/>
+        </tableViewCell>
+    </objects>
+</document>

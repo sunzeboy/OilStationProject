@@ -1,0 +1,232 @@
+package cn.sh.changxing.ct.mobile.comm;
+
+import android.app.Activity;
+import android.app.Fragment;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
+import android.widget.Toast;
+
+/**
+ * <b>Function Name：</b>fragment base class<br>
+ * <b>History：</b>2014/2/9 wangjianqing create<br>
+ * <br>
+ *
+ * @author SIS wangjianqing
+ * @version 1.0.0 2014/2/9
+ */
+public class FragmentEx extends Fragment
+{
+	// string for logging the class name
+	protected final String LOG_TAG = getClass().getSimpleName();
+	protected final static boolean isLog = true;
+	
+	protected enum CallViewLayerAction
+	{
+		ACTION_OF_INIT_COMPONENT,
+		ACTION_OF_DISPOSE
+	}
+	
+	protected ActivityEx mActivity;
+	
+	public FragmentEx()
+	{
+		super();
+	}
+	
+	protected void callChildOperViewLayersAction(View view, CallViewLayerAction actionValue)
+	{
+		try
+		{
+			if (view instanceof ViewGroup)
+			{
+				ViewGroup rootViewGroup = (ViewGroup) view;
+				int childViewCount = rootViewGroup.getChildCount();
+				for (int i = 0; i < childViewCount; i++)
+				{
+					View childView = rootViewGroup.getChildAt(i);
+					
+					if (childView instanceof IOperViewLayer)
+					{
+						IOperViewLayer operViewLayer = (IOperViewLayer) childView;
+						
+						switch (actionValue)
+						{
+						case ACTION_OF_INIT_COMPONENT:
+							operViewLayer.initComponent();
+							break;
+							
+						case ACTION_OF_DISPOSE:
+							operViewLayer.dispose();
+							break;
+							
+						default:
+							Log.e(LOG_TAG, "callChildOperViewLayersAction():unknown action value=[" + actionValue + "]");
+							break;
+						}
+					}
+					
+					if (childView instanceof ViewGroup)
+					{
+						callChildOperViewLayersAction(childView, actionValue);
+					}
+				} // i
+			}
+		}
+		catch (Exception ex)
+		{
+			if (isLog)
+			{
+				Log.e(LOG_TAG, "Exception:" + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+	}
+	
+	protected void setInterceptTouchEvent(View view)
+	{
+		view.setOnTouchListener(new OnTouchListener()
+		{
+			@Override
+			public boolean onTouch(View v, MotionEvent event)
+			{
+				// return true because of the listener has consumed the event.
+				return true;
+			}
+		});
+	}
+	
+	@Override
+	public void onAttach(Activity activity)
+	{
+		super.onAttach(activity);
+	
+        if (isLog)
+        {
+        	Log.i(LOG_TAG, "Fragment.onAttach()");
+        }
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+	
+        if (isLog)
+        {
+        	Log.i(LOG_TAG, "Fragment.onCreate()");
+        }
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState)
+	{
+		super.onSaveInstanceState(outState);
+	
+        if (isLog)
+        {
+        	Log.i(LOG_TAG, "Fragment.onSaveInstanceState()");
+        }
+	}
+	
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState)
+	{
+		super.onActivityCreated(savedInstanceState);
+		
+		mActivity = (ActivityEx) getActivity();
+		callChildOperViewLayersAction(getView(), CallViewLayerAction.ACTION_OF_INIT_COMPONENT);
+	
+        if (isLog)
+        {
+        	Log.i(LOG_TAG, "Fragment.onActivityCreated()");
+        }
+	}
+	
+	@Override
+	public void onStart()
+	{
+		super.onStart();
+	
+        if (isLog)
+        {
+        	Log.i(LOG_TAG, "Fragment.onStart()");
+        }
+	}
+	
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+	
+        if (isLog)
+        {
+        	Log.i(LOG_TAG, "Fragment.onResume()");
+        }
+	}
+	
+	@Override
+	public void onPause()
+	{
+		super.onPause();
+	
+        if (isLog)
+        {
+        	Log.i(LOG_TAG, "Fragment.onPause()");
+        }
+	}
+	
+	@Override
+	public void onStop()
+	{
+		super.onStop();
+	
+        if (isLog)
+        {
+        	Log.i(LOG_TAG, "Fragment.onStop()");
+        }
+	}
+	
+	@Override
+	public void onDestroyView()
+	{
+		super.onDestroyView();
+	
+        if (isLog)
+        {
+        	Log.i(LOG_TAG, "Fragment.onDestroyView()");
+        }
+	}
+	
+	@Override
+	public void onDestroy()
+	{
+		super.onDestroy();
+		
+		callChildOperViewLayersAction(getView(), CallViewLayerAction.ACTION_OF_DISPOSE);
+	
+        if (isLog)
+        {
+        	Log.i(LOG_TAG, "Fragment.onDestroy()");
+        }
+	}
+	
+	@Override
+	public void onDetach()
+	{
+		super.onDetach();
+	
+        if (isLog)
+        {
+        	Log.i(LOG_TAG, "Fragment.onDetach()");
+        }
+	}
+	
+	public void showToast(String msg)
+	{
+		Toast.makeText(getActivity(), msg, Toast.LENGTH_LONG).show();
+	}
+}

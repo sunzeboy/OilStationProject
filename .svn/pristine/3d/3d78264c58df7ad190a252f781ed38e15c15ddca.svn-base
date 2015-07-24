@@ -1,0 +1,93 @@
+//
+//  ListVC.m
+//  GasStationAPP
+//
+//  Created by sunze on 15/6/17.
+//  Copyright (c) 2015年 sunze. All rights reserved.
+//
+
+#import "ListVC.h"
+#import "CusListCell.h"
+#import "CustomLabel.h"
+#import <BaiduMapAPI/BMapKit.h>
+#import "Constants.h"
+#import "Helpers.h"
+#import "PostModel.h"
+#import "MJExtension.h"
+#import "ResponseModel.h"
+@interface ListVC ()
+
+@end
+
+@implementation ListVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+}
+-(void)viewWillAppear:(BOOL)animated
+{
+
+ 
+
+
+}
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - Table view data source
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return self.arrayResult.count;
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 140;
+}
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *cellidentify = @"CustomTableViewCell";
+    CusListCell *cell = (CusListCell *)[tableView dequeueReusableCellWithIdentifier:cellidentify];
+    if (cell == nil) {
+        cell = [[[NSBundle mainBundle] loadNibNamed:@"CusListCell" owner:self options:nil] objectAtIndex:0];
+    }
+    ResponseModel *info = [ResponseModel objectWithKeyValues:self.arrayResult[indexPath.row]];
+    cell.name.text = info.stationName;
+    cell.dizhi.text = info.address;
+    cell.juli.text = [NSString stringWithFormat:@"%@千米",info.distance];
+    NSArray *arrayPrice = @[cell.price1,cell.price2,cell.price3];
+    NSMutableArray *arraySelect = [NSMutableArray array];
+    NSDictionary *dic = @{@"1000":@"G92",@"1001":@"G95",@"1002":@"D0"};
+    for (int i=0; i<3; i++) {
+        NSString *str = [[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithFormat:@"%zd",1000+i]];
+        if ([str isEqualToString:@"YES"]) {
+            [arraySelect addObject:[NSString stringWithFormat:@"%zd",1000+i]];
+        }
+    }
+    for (int i=0; i<arraySelect.count; i++) {
+       CustomLabel *label =(CustomLabel * )arrayPrice[i];
+        label = [[CustomLabel alloc] initWithFrame:CGRectMake(10+i*110, 100, 100, 30)];
+        [cell.contentView addSubview:label];
+        NSString *name = dic[arraySelect[i]];
+        [label setCustomLabelWithLeftString:name RightString:info.oilType[name]];
+    }
+    
+    return cell;
+}
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (self.ListVCBlock) {
+        self.ListVCBlock(indexPath.row);
+        NSLog(@"%zd",indexPath.row);
+    }
+    [self.delegate withNum:indexPath.row];
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+@end

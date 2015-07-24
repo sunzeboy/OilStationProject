@@ -1,0 +1,90 @@
+package cn.sh.changxing.ct.mobile.utils;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+
+/**
+ * <b>Function Name：</b><br>
+ * <b>History：</b>2013/04/25 陈健 create<br>
+ * <br>
+ *
+ * @author SIS 陈健
+ * @version 1.0.0 2013/04/25
+ */
+public class DistanceFormatStringUtils {
+	/*
+	 * 单位名称：米
+	 */
+	public static final String UNIT_NAME_METER = "米";
+	/*
+	 * 单位名称：公里
+	 */
+	public static final String UNIT_NAME_KILOMETER = "公里";
+	/**
+	 * 空串
+	 */
+	public static final String EMPTY = "";
+	/**
+	 * 文字：无
+	 */
+	public static final String STR_NULL = "无";
+	
+	/**
+	 * 1~10公里的format格式
+	 */
+	private static final DecimalFormat DF_1TO10_KM_DISTANCE = new DecimalFormat("#.#");
+	/**
+	 * 大于10公里的format格式
+	 */
+	private static final DecimalFormat DF_OVER_10_KM_DISTANCE = new DecimalFormat("#");
+	
+	
+	/**
+	 * 将以米为单位format到适当单位，超过1000米，以公里显示<br>
+	 * 1~10公里，1位小数舍入<br>
+	 * 10公里以上，整数舍入
+	 * @param distance 距离单位米
+	 * @return
+	 */
+	public static String formatDistance(int distance){
+		String dis = EMPTY;
+		String unitName = EMPTY;
+		try {
+			if(distance >= 10000){
+				unitName = UNIT_NAME_KILOMETER;
+				dis = DF_OVER_10_KM_DISTANCE.format((float) distance / 1000);
+			} else if(distance >= 1000 &&  distance < 10000) {
+				unitName = UNIT_NAME_KILOMETER;
+				dis = DF_1TO10_KM_DISTANCE.format((float) distance / 1000);
+			} else {
+				unitName = UNIT_NAME_METER;
+				dis = String.valueOf(distance);
+			}
+		} catch (Exception e) {
+			
+		}
+		return dis + unitName;
+	}
+	
+	/**
+	 * 数值取舍
+	 * @param value 值
+	 * @param scale 取舍位数
+	 * @return
+	 */
+	public static String formatNumber(double value, int scale){
+		BigDecimal bd = new BigDecimal(value);
+		return String.valueOf(bd.setScale(scale, BigDecimal.ROUND_HALF_DOWN).doubleValue());
+	}
+	
+	/**
+	 * 取得非空值<br>
+	 * 
+	 * @param val 原始值
+	 * @param defVal 默认值
+	 * @return
+	 */
+	public static String getValueByDefault(String val, String defVal){
+		return val == null ? defVal : val;
+	}
+	
+}

@@ -1,0 +1,25 @@
+package cn.sh.changxing.ct.mobile.comm;
+
+public class MobileConstants {
+	// -------------------share constants start---------------------------
+	public static final String EXTRA_NAME_SHARE_ACTION_TYPE = "action_type";
+	public static final int EXTRA_VALUE_ACTION_SHARE_CONTACTS = 1;
+	public static final int EXTRA_VALUE_ACTION_SHARE_POSITION = 2;
+	public static final int EXTRA_VALUE_ACTION_SHARE_CONDITION = 3;
+	public static final String EXTRA_NAME_SHARE_INFO_NAME = "share_info";
+	public static final int SHARE_GET_PHOTO_REQUEST_CODE = 20150526;
+	// -------------------share constants end----------------------------
+
+	// -------------------select picture start ---------------------------
+	public static final String EXTRA_NAME_SELECT_PICTURE_TYPE = "select_picture_type";
+	public static final int EXTRA_VALUE_FROM_DEFAULT = 0;
+	public static final int EXTRA_VALUE_FROM_ACCOUNT_INFO_FILL_IN = 1;
+	public static final int EXTRA_VALUE_FROM_ACCOUNT_INFO = 2;
+	public static final int EXTRA_VALUE_FROM_ACTION_SHARE = 3;
+	// 收到图片检索成功
+	public final static int SCAN_OK = 0x01;
+	// 未收图片检索
+	public final static int SCAN_NO_FILE = 0x02;
+	// -------------------select picture end ----------------------------
+
+}

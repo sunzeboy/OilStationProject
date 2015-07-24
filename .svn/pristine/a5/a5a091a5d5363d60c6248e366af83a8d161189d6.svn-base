@@ -1,0 +1,159 @@
+package cn.sh.changxing.ct.mobile.fragment.lbs;
+
+import java.util.ArrayList;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageButton;
+import android.widget.ListView;
+
+import com.ionicframework.cnpcmobile317812.R;
+import cn.sh.changxing.ct.mobile.activity.LbsActivity;
+import cn.sh.changxing.ct.mobile.comm.FragmentEx;
+import cn.sh.changxing.ct.mobile.logic.lbs.entity.MapResultListInfoEntity;
+import cn.sh.changxing.ct.mobile.logic.lbs.entity.OilInfoEntity;
+import cn.sh.changxing.ct.mobile.view.lbs.adapter.MapResultListAdapter;
+
+ 
+public class MapResultListFragment extends FragmentEx  implements OnClickListener
+{
+	private LbsActivity mActivity;
+    private ImageButton mReturnButton;
+    private ListView mListView; 
+	private MapResultListAdapter mMapResultListAdapter;
+	private ArrayList<MapResultListInfoEntity> mDatas;
+	
+	public MapResultListFragment()
+	{
+		 
+	}
+	
+	private void getControlObjects()
+	{
+		mActivity = (LbsActivity)getActivity();
+		mReturnButton = (ImageButton) mActivity.findViewById(R.id.btn_lbs_back);
+		mListView = (ListView)mActivity.findViewById(R.id.lv_map_info);
+		mMapResultListAdapter = new MapResultListAdapter(mActivity,mDatas);
+	}
+	
+	private void setControlObjects()
+	{
+		mReturnButton.setOnClickListener(this);
+		mListView.setAdapter(mMapResultListAdapter);
+		mListView.setOnItemClickListener(mOnItemClickListener);
+		 
+	}
+	
+	private OnItemClickListener mOnItemClickListener =new OnItemClickListener(){
+
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+	};
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState)
+	{
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+	}
+	
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+	{
+
+		View view = inflater.inflate(R.layout.fragment_lbs_map_result_list, container, false);
+		return view;
+	}
+	
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		loadDatas();
+		getControlObjects();
+		setControlObjects();
+	}
+
+	@Override
+	public void onResume()
+	{
+		super.onResume();
+	}
+
+	@Override
+	public void onPause()
+	{
+		super.onPause();
+	}
+	
+	@Override
+	public void onDestroy()
+	{
+		super.onDestroy();
+		 
+	}
+ 
+	private void loadDatas() {
+		
+		mDatas = new ArrayList<MapResultListInfoEntity>();
+		
+		for(int i=0;i<15;i++){
+			MapResultListInfoEntity item = new MapResultListInfoEntity();
+			item.setName("中石油金科加油站");
+			item.setAddress("上海是浦东新区高科中路1176号");
+			item.setDistance(2.0);
+		
+			ArrayList<OilInfoEntity> OilInfoEntityList = new  ArrayList<OilInfoEntity>();
+			OilInfoEntity info = new OilInfoEntity();
+			info.setType(OilInfoEntity.TYPE_92);
+			info.setPrice(6.33);
+			
+			
+			if(i==3){
+				OilInfoEntity info1 = new OilInfoEntity();
+				info1.setType(OilInfoEntity.TYPE_95);
+				info1.setPrice(6.88);
+				OilInfoEntityList.add(info1);
+				
+				
+				OilInfoEntity info2 = new OilInfoEntity();
+				info2.setType(OilInfoEntity.TYPE_0);
+				info2.setPrice(6.88);
+				OilInfoEntityList.add(info2);
+			}
+			
+			
+			OilInfoEntityList.add(info);
+			
+			item.setListOilInfo(OilInfoEntityList);
+			mDatas.add(item);
+		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId())
+		{
+		case R.id.btn_lbs_back:
+			mActivity.closePopFragmentOnTop();
+			break;
+	 	
+		default:
+			break;
+		} 
+		
+	}
+	 
+    
+   
+   
+}

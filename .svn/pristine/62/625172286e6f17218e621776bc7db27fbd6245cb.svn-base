@@ -1,0 +1,669 @@
+package cn.sh.changxing.ct.mobile.logic.lbs;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import android.R.integer;
+import android.util.Log;
+import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.BaiduMap.OnMarkerClickListener;
+import com.baidu.mapapi.map.BitmapDescriptor;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.map.MapStatus;
+import com.baidu.mapapi.map.MapStatusUpdate;
+import com.baidu.mapapi.map.MapStatusUpdateFactory;
+import com.baidu.mapapi.map.Marker;
+import com.baidu.mapapi.map.MarkerOptions;
+import com.baidu.mapapi.map.MyLocationConfiguration;
+import com.baidu.mapapi.map.OverlayOptions;
+import com.baidu.mapapi.model.LatLng;
+import com.ionicframework.cnpcmobile317812.R;
+import cn.sh.changxing.ct.mobile.bdmap.adapter.entity.PoiInfoEx;
+import cn.sh.changxing.ct.mobile.logic.lbs.entity.MarkerInfoEntity;
+import cn.sh.changxing.ct.mobile.logic.lbs.marker.BaseMarkerType;
+//import cn.sh.changxing.ct.mobile.logic.lbs.marker.FavoritedPoiMarkerType;
+//import cn.sh.changxing.ct.mobile.logic.lbs.marker.GlobalEyeMarkerType;
+import cn.sh.changxing.ct.mobile.logic.lbs.marker.IndexMarkerType;
+import cn.sh.changxing.ct.mobile.logic.lbs.marker.UserMarkerType;
+import cn.sh.changxing.ct.mobile.props.EnvInfo;
+import cn.sh.changxing.ct.mobile.utils.ResourceUtils;
+
+/**
+ * 
+ * @ClassName: MarkerManagerLogic
+ * @Description:
+ * @author caiyingshui
+ * @date 2015-3-13 下午2:14:37
+ *
+ */
+public class MarkerManagerLogic
+{
+	private static MarkerManagerLogic mMarkManagerLogic;
+
+	private final String LOG_TAG = getClass().getSimpleName();
+	/**
+	 * 该数据主要是为了通过type取所有符合此type的marker集合
+	 */
+	private HashMap<BaseMarkerType, List<Marker>> mMapMarks = new HashMap<BaseMarkerType, List<Marker>>();
+	/**
+	 * 该数据主要是为了通过marker获取poi对象
+	 */
+	private Map<Marker, MarkerInfoEntity> mMarkerEntities = new HashMap<Marker, MarkerInfoEntity>();
+	
+	private BitmapDescriptor mIconMapPoi = null;
+
+	private BitmapDescriptor mIconFavorite = null;
+
+	private BitmapDescriptor mIconGlobalEye = null;
+
+	private final static int MAX_SIZE_OF_ONE_TYPE_MARKER = 100;
+
+	private final static int MAX_INDEX_MARKER_SIZE = 10;
+
+	private BaiduMap mBaiduMap;
+	
+	private IMarkerListInMapListener mIMarkerListInMapImpl = new IMarkerListInMapListener()
+	{
+
+		private int highlightIndex = -1;
+
+		@Override
+		public void showMarker(BaiduMap baiduMap, List<PoiInfoEx> list)
+		{
+			if (list == null)
+			{
+				return;
+			}
+			highlightIndex = -1;
+			mBaiduMap = baiduMap;
+//			mMarkManagerLogic
+//					.removeTypeOfMarkers(UserMarkerType.MARKER_INDEX_POI);
+
+			mMarkManagerLogic.addMarkers(baiduMap, list,
+					UserMarkerType.MARKER_INDEX_POI, false);
+			
+			//highlightSelectMarker(baiduMap, defIndex);
+			
+			setBaiduMapClickListener(baiduMap,0);
+				 
+			
+		}
+
+		private void setBaiduMapClickListener(BaiduMap baiduMap,Integer index){
+			baiduMap.setOnMarkerClickListener( mOnMarkerClickListener);
+			for(Marker maker: mMarkerEntities.keySet()){
+				MarkerInfoEntity entity = mMarkerEntities.get(maker);
+				if((Integer)entity.getTag() == index){
+					mOnMarkerClickListener.onMarkerClick(maker);
+					break;
+				}
+			}
+		}
+		
+		
+		@Override
+		public void removeMarker()
+		{
+			mMarkManagerLogic
+					.removeTypeOfMarkers(UserMarkerType.MARKER_INDEX_POI);
+		}
+
+		@Override
+		public void highlightSelectMarker(BaiduMap baiduMap, int index)
+		{
+			MapStatus mapStatus = null;
+			List<Marker> markers = mMapMarks
+					.get(UserMarkerType.MARKER_INDEX_POI);
+			int[] nomalIconRes = ResourceUtils.getIntArrayRescId(EnvInfo
+					.getInstance().getAppContext(),
+					R.array.marker_index_nomal_icon);
+			int[] focusIconRes = ResourceUtils.getIntArrayRescId(EnvInfo
+					.getInstance().getAppContext(),
+					R.array.marker_index_focus_icon);
+
+			if (highlightIndex >= 0)
+			{
+				Marker prevMarker = markers.get(highlightIndex);
+				BitmapDescriptor icon = BitmapDescriptorFactory
+						.fromResource(nomalIconRes[highlightIndex]);
+				prevMarker.setIcon(icon);
+			}
+
+			for (int i = 0; i < markers.size(); i++)
+			{
+				Marker marker = markers.get(index);
+
+				mapStatus = new MapStatus.Builder()
+						.target(marker.getPosition()).build();
+
+				if (i == index)
+				{
+					marker.setToTop();
+					BitmapDescriptor focusIcon = BitmapDescriptorFactory
+							.fromResource(focusIconRes[index]);
+					marker.setIcon(focusIcon);
+					highlightIndex = index;
+				}
+			}
+			MapStatusUpdate update = MapStatusUpdateFactory
+					.newMapStatus(mapStatus);
+		
+			baiduMap.animateMapStatus(update);
+			
+			
+		}
+
+		@Override
+		public void clearFocusMarker()
+		{
+			List<Marker> markers = mMapMarks
+					.get(UserMarkerType.MARKER_INDEX_POI);
+			int[] nomalIconRes = ResourceUtils.getIntArrayRescId(EnvInfo
+					.getInstance().getAppContext(),
+					R.array.marker_index_nomal_icon);
+			if (highlightIndex >= 0)
+			{
+				Marker prevMarker = markers.get(highlightIndex);
+				BitmapDescriptor icon = BitmapDescriptorFactory
+						.fromResource(nomalIconRes[highlightIndex]);
+				prevMarker.setIcon(icon);
+			}
+
+			highlightIndex = -1;
+		}
+	};
+
+	private OnMarkerClickListener mOnMarkerClickListener = new OnMarkerClickListener()
+	{
+
+		@Override
+		public boolean onMarkerClick(Marker marker)
+		{
+			MarkerInfoEntity entity;
+			entity = getMarkerEntityByMarker(marker);
+			Integer index = (Integer)entity.getTag();
+			highlightSelectMarker(mBaiduMap, index);
+			if (entity != null)
+			{
+				entity.getUserMarkerType().onMarkerClick(entity);
+			}
+			else
+			{
+				Log.w(getClass().getSimpleName(),
+					  "Can not found marker in MarkerEntities which marker=[" + marker.toString() +
+					  "], MarkerEntities.size()=[" + mMarkerEntities.size() + "]");
+			}
+			return false;
+		}
+	};
+
+	private MarkerManagerLogic()
+	{
+		initMarkerTypePic();
+	}
+
+	public static synchronized MarkerManagerLogic getInstance()
+	{
+		if (mMarkManagerLogic == null)
+		{
+			mMarkManagerLogic = new MarkerManagerLogic();
+		}
+		return mMarkManagerLogic;
+	}
+
+	/**
+	 * 显示搜索结果marker 通过index的方式表示
+	 * @param baiduMap
+	 * @param list
+	 */
+	public void showSearchListMarker(BaiduMap baiduMap, List<PoiInfoEx> list)
+	{
+		mIMarkerListInMapImpl.showMarker(baiduMap, list);
+	}
+
+	/**
+	 * 将index显示方式的marker设置为不显示，删除marker
+	 */
+	public void removeSearchListMarker()
+	{
+		mIMarkerListInMapImpl.removeMarker();
+	}
+
+	/**
+	 * 将index标号的marker高亮并且移至地图中心
+	 * @param baiduMap
+	 * @param index
+	 */
+	public void highlightSelectMarker(BaiduMap baiduMap, int index)
+	{
+//		BitmapDescriptor picMarkerOfCCP = BitmapDescriptorFactory
+//				.fromResource(R.drawable.pic_mark_ccp_bg);
+
+		//TODO 更改定位类型按钮显示
+		baiduMap.setMyLocationConfigeration(
+						new MyLocationConfiguration(
+						MyLocationConfiguration.LocationMode.NORMAL, true,
+						null));
+
+		mIMarkerListInMapImpl.highlightSelectMarker(baiduMap, index);
+	}
+
+	/**
+	 * 清除marker高亮显示状态
+	 */
+	public void clearSelectMarkerFocus()
+	{
+		mIMarkerListInMapImpl.clearFocusMarker();
+	}
+
+//	/**
+//	 * 获取marker数据集
+//	 * @return
+//	 */
+//	private Map<Marker, MarkerInfoEntity> getMarkerPoiInfos()
+//	{
+//		return mMarkerEntities;
+//	}
+
+	/**
+	 * 
+	 */
+	public synchronized int getCountOfTypeOfMarkers(BaseMarkerType type)
+	{
+		int count = 0;
+		List<Marker> markerList;
+
+		if (mMapMarks.containsKey(type))
+		{
+			markerList = mMapMarks.get(type);
+			count = markerList.size();
+		}
+		
+		return count;
+	}
+	
+	/**
+	 * 清除marker数据集
+	 */
+	public synchronized void clear()
+	{
+		mMapMarks.clear();
+		mMarkerEntities.clear();
+	}
+
+	/**
+	 * 将type类型的marker从marker从地图中删除
+	 * @param type
+	 * @param descMarker
+	 * @return
+	 */
+	public synchronized boolean removeMarker(BaseMarkerType type,
+			Marker descMarker)
+	{
+		List<Marker> markerList;
+
+		if (!mMapMarks.containsKey(type))
+		{
+			return false;
+		}
+
+		markerList = mMapMarks.get(type);
+
+		for (Marker marker : markerList)
+		{
+			if (marker.getPosition().latitude == descMarker.getPosition().latitude
+					&& marker.getPosition().longitude == descMarker
+							.getPosition().longitude)
+			{
+				markerList.remove(marker);
+				try
+				{
+					marker.remove();
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+				}
+				return true;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * 将type类型的所有marker从地图中删除
+	 * @param type
+	 * @return
+	 */
+	public synchronized boolean removeTypeOfMarkers(BaseMarkerType type)
+	{
+		List<Marker> markerList;
+
+		if (!mMapMarks.containsKey(type))
+		{
+			return false;
+		}
+
+		markerList = mMapMarks.get(type);
+
+		for (Marker marker : markerList)
+		{
+			try
+			{
+				marker.remove();
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+
+		markerList.clear();
+
+		return true;
+	}
+
+	/**
+	 * 向mapView中增加marker对象列表
+	 * 
+	 * @param baiduMap
+	 * @param poiInfos
+	 *            marker Poi 信息集合
+	 * @param type
+	 *            marker类型
+	 * @param isDelPrevMarker
+	 *            是否删除上一个marker后再重新添加 true：删除上一个增加的marker false：直接添加，不删除
+	 * @return
+	 */
+	public synchronized boolean addMarkers(BaiduMap baiduMap,
+			List<PoiInfoEx> poiInfos, BaseMarkerType type,
+			boolean isDelPrevMarker)
+	{
+		OverlayOptions options;
+
+		if (poiInfos == null || poiInfos.size() == 0)
+		{
+			return false;
+		}
+
+		if (isDelPrevMarker)
+		{
+			deleteTypeOfMarkers(type);
+		}
+
+		if (type instanceof IndexMarkerType)
+		{
+			addMarkerContainIndex(baiduMap, poiInfos);
+			return true;
+		}
+
+		for (PoiInfoEx poiInfo : poiInfos)
+		{
+			options = getMarkerOptions(type, poiInfo.location);
+			Marker marker = (Marker) baiduMap.addOverlay(options);
+			addMarkerToCache(type, marker, poiInfo, null);
+		}
+
+		return true;
+	}
+	
+	/**
+	 * 向mapView中增加marker对象
+	 * 
+	 * @param baiduMap
+	 * @param poiInfo
+	 *            marker Poi 信息
+	 * @param type
+	 *            marker类型
+	 * @param isDelPrevMarker
+	 *            是否删除上一个marker后再重新添加 true：删除上一个增加的marker false：直接添加，不删除
+	 * @param tag
+	 *            附属物的对象
+	 * @return
+	 */
+	public synchronized boolean addMarker(
+									BaiduMap baiduMap,
+									PoiInfoEx poiInfo,
+									BaseMarkerType type,
+									boolean isDelPrevMarker,
+									Object tag)
+	{
+		OverlayOptions options;
+		
+		if (poiInfo == null)
+		{
+			return false;
+		}
+		
+		if (isDelPrevMarker)
+		{
+			deleteTypeOfMarkers(type);
+		}
+		
+		options = getMarkerOptions(type, poiInfo.location);
+		Marker marker = (Marker) baiduMap.addOverlay(options);
+		addMarkerToCache(type, marker, poiInfo, tag);
+		
+		return true;
+	}
+	
+	/**
+	 * 向mapView中增加marker对象
+	 * 
+	 * @param baiduMap
+	 * @param poiInfo
+	 *            marker Poi 信息
+	 * @param type
+	 *            marker类型
+	 * @param isDelPrevMarker
+	 *            是否删除上一个marker后再重新添加 true：删除上一个增加的marker false：直接添加，不删除
+	 * @return
+	 */
+	public boolean addMarker(BaiduMap baiduMap,
+			PoiInfoEx poiInfo, BaseMarkerType type,
+			boolean isDelPrevMarker)
+	{
+		return addMarker(baiduMap, poiInfo, type, isDelPrevMarker, null);
+	}
+
+	 
+	
+	/**
+	 * 增加带索引编号的marker
+	 * @param baiduMap
+	 * @param poiInfos
+	 * @return
+	 */
+	private boolean addMarkerContainIndex(BaiduMap baiduMap,
+			List<PoiInfoEx> poiInfos)
+	{
+		try
+		{
+			int markerCount = 0;
+	
+			int[] iconRes = ResourceUtils.getIntArrayRescId(EnvInfo.getInstance()
+					.getAppContext(), R.array.marker_index_nomal_icon);
+	
+			if (MAX_INDEX_MARKER_SIZE >= poiInfos.size())
+			{
+				markerCount = poiInfos.size();
+			}
+			else
+			{
+				markerCount = MAX_INDEX_MARKER_SIZE;
+			}
+	
+			for (int i = 0; i < markerCount; i++)
+			{
+				BitmapDescriptor icon = BitmapDescriptorFactory
+						.fromResource(iconRes[i]);
+				OverlayOptions oOptions = new MarkerOptions()
+						.position(poiInfos.get(i).location).icon(icon)
+						.draggable(false);
+				Marker marker = (Marker) baiduMap.addOverlay(oOptions);
+				addMarkerToCache(UserMarkerType.MARKER_INDEX_POI, marker,
+								 poiInfos.get(i), i);
+				
+			}
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+
+		return true;
+	}
+
+	/**
+	 * 获取marker的Entity对象
+	 * @param marker
+	 * @return
+	 */
+	private MarkerInfoEntity getMarkerEntityByMarker(Marker marker)
+	{
+		if (marker == null || mMarkerEntities.size() == 0)
+		{
+			return null;
+		}
+
+		return mMarkerEntities.get(marker);
+	}
+
+	/**
+	 * 删除上一个marker
+	 * @param type
+	 */
+	private boolean deleteTypeOfMarkers(BaseMarkerType type)
+	{
+		try
+		{
+			List<Marker> markerList;
+
+			if (!mMapMarks.containsKey(type))
+			{
+				return false;
+			}
+
+			markerList = mMapMarks.get(type);
+
+			for (Marker marker : markerList)
+			{
+				try
+				{
+					marker.remove();
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+				}
+			}
+
+			markerList.clear();
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+
+		return true;
+	}
+
+	/**
+	 * 将marker加入到数据集中
+	 * @param type
+	 * @param marker
+	 * @param poiInfo
+	 * @param tag
+	 */
+	private void addMarkerToCache(BaseMarkerType type, Marker marker,
+								  PoiInfoEx poiInfo, Object tag)
+	{
+		try
+		{
+			List<Marker> markerList;
+	
+			if (mMapMarks.containsKey(type))
+			{
+				markerList = mMapMarks.get(type);
+			}
+			else
+			{
+				markerList = new ArrayList<Marker>();
+			}
+	
+			if (markerList.size() < MAX_SIZE_OF_ONE_TYPE_MARKER)
+			{
+				markerList.add(marker);
+				MarkerInfoEntity entity = new MarkerInfoEntity(type, poiInfo);
+				entity.setTag(tag);
+				mMarkerEntities.put(marker, entity);
+			}
+			else
+			{
+				try
+				{
+					marker.remove();
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+				}
+				Log.w(LOG_TAG, "max marker added,add fail...");
+			}
+	
+			mMapMarks.put(type, markerList);
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+
+	/**
+	 * 根据type获取marker options
+	 * @param type
+	 * @param latLng
+	 * @return
+	 */
+	private OverlayOptions getMarkerOptions(BaseMarkerType type, LatLng latLng)
+	{
+		BitmapDescriptor icon = mIconMapPoi;
+
+//		if (type instanceof FavoritedPoiMarkerType)
+//		{
+//			icon = mIconFavorite;
+//		}
+//		else if (type instanceof GlobalEyeMarkerType)
+//		{
+//			icon = mIconGlobalEye;
+//		}
+
+		OverlayOptions oOptions = new MarkerOptions().position(latLng)
+				.icon(icon).draggable(false);
+
+		return oOptions;
+	}
+
+	/**
+	 * 初始化marker图片
+	 */
+	private void initMarkerTypePic()
+	{
+		mIconMapPoi = BitmapDescriptorFactory
+				.fromResource(R.drawable.pic_mark_poi_bg);
+//		mIconFavorite = BitmapDescriptorFactory
+//				.fromResource(R.drawable.pic_mark_favorited_addr_bg);
+//		mIconGlobalEye = BitmapDescriptorFactory
+//				.fromResource(R.drawable.pic_mark_global_eyes_bg);
+	}
+
+	public OnMarkerClickListener getOnMarkerClickListener()
+	{
+		return mOnMarkerClickListener;
+	}
+}

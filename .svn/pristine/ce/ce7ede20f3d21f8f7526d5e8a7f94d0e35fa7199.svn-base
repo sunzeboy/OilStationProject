@@ -1,0 +1,13 @@
+//
+//  MapVC.h
+//  cnpc-mobile
+//
+//  Created by Wang ChenWei on 15/6/23.
+//
+//
+
+#import <UIKit/UIKit.h>
+
+@interface MapVC : UIViewController
+
+@end

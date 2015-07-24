@@ -1,0 +1,27 @@
+<resources>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <!-- fragment map oper start -->
+    <dimen name="btn_fragment_map_oper_road_detail_marginTop">5dp</dimen>
+    <dimen name="btn_fragment_map_oper_marginRight">10dp</dimen>
+    
+    <dimen name="lbs_map_poi_name_textsize">18sp</dimen>
+    <dimen name="lbs_map_poi_info_textsize">14sp</dimen>
+    <!-- fragment map oper end -->
+    <dimen name="lbs_map_oper_image_label_btn_textsize">12sp</dimen>
+    <!-- fragment title textsize -->
+    <dimen name="fragment_title_textsize">22sp</dimen>
+    <dimen name="head_search_action_bar_text_size">20sp</dimen>
+    <dimen name="lbs_settings_item_height">40sp</dimen>
+    <dimen name="lbs_settings_item_font_size">22sp</dimen>
+    <dimen name="lbs_map_item_name_font_size">18sp</dimen>
+    <dimen name="lbs_map_item_name_font_address_size">12sp</dimen>
+    <dimen name="lbs_map_item_name_font_oil_size">18sp</dimen>
+     <!-- lbs for fragment poi result in map height -->
+     <dimen name="lbs_search_poi_map_viewpager_height">72dp</dimen>
+     <dimen name="confirm_dialog_width">280dp</dimen>
+     <dimen name="confirm_dialog_height">100dp</dimen>
+</resources>

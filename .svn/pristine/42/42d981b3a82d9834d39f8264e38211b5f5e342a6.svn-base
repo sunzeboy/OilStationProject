@@ -1,0 +1,47 @@
+package cn.sh.changxing.ct.mobile.logic.lbs.entity;
+
+import cn.sh.changxing.ct.mobile.bdmap.adapter.entity.PoiInfoEx;
+import cn.sh.changxing.ct.mobile.logic.lbs.marker.BaseMarkerType;
+
+/**
+ * 
+ * @ClassName: MarkerInfoEntity 
+ * @Description:  
+ * @author caiyingshui 
+ * @date 2015-3-13 下午2:12:44 
+ *
+ */
+public class MarkerInfoEntity
+{
+	private BaseMarkerType mMarkerType;
+	
+	private PoiInfoEx mPoiInfoEx;
+	
+	private Object mTag;
+	
+	public MarkerInfoEntity(BaseMarkerType type, PoiInfoEx poiInfo)
+	{
+		mMarkerType = type;
+		mPoiInfoEx = poiInfo;
+	}
+	
+	public BaseMarkerType getUserMarkerType()
+	{
+		return mMarkerType;
+	}
+	
+	public PoiInfoEx getPoiInfoEx()
+	{
+		return mPoiInfoEx;
+	}
+	
+	public void setTag(Object tag)
+	{
+		mTag = tag;
+	}
+	
+	public Object getTag()
+	{
+		return mTag;
+	}
+}

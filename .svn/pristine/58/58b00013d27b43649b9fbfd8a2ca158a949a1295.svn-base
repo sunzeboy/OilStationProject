@@ -1,0 +1,26 @@
+//
+//  CustomTypeCell.m
+//  cnpc-mobile
+//
+//  Created by Wang ChenWei on 15/6/24.
+//
+//
+
+#import "CustomTypeCell.h"
+#import "Helpers.h"
+#import "Constants.h"
+@implementation CustomTypeCell
+
+-(void)awakeFromNib
+{
+   
+}
+
+
+- (IBAction)switchBtn:(id)sender {
+    self.switchBtn = (UISwitch *)sender;
+ [[NSUserDefaults standardUserDefaults] setValue:[NSString stringWithFormat:@"%@",self.switchBtn.on?@"YES":@"NO"] forKey:[NSString stringWithFormat:@"%zd",self.switchBtn.tag]];
+   BOOL ISOK= [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+@end

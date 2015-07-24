@@ -1,0 +1,560 @@
+//
+//  MapVC.m
+//  cnpc-mobile
+//
+//  Created by Wang ChenWei on 15/6/23.
+//
+//
+
+#import "MapVC.h"
+#import <BaiduMapAPI/BMapKit.h>
+#import "KxMenu.h"
+#import "AppDelegate.h"
+#import "TopDownBtn.h"
+#import "CustomCell.h"
+#import "CustomLabel.h"
+#import "ListVC.h"
+#import "CustomTableView.h"
+#import "Constants.h"
+#import "Helpers.h"
+#import "MJExtension.h"
+#import "PostModel.h"
+#import "AFNetworking.h"
+#import "CustomPointAnnotation.h"
+#import "OilTypeVC.h"
+#define SZFilterNearByOilStation @"http://192.168.30.234:3000/poi/FilterNearByOilStation"
+@interface MapVC ()
+<BMKLocationServiceDelegate,
+BMKPoiSearchDelegate,
+BMKMapViewDelegate,
+UITableViewDataSource,
+UITableViewDelegate,
+BNNaviRoutePlanDelegate,
+BNNaviUIManagerDelegate>
+{
+    BMKPoiSearch *_poisearch;
+    NSMutableArray *_arrayPost;//请求数据
+    NSArray *_arrayResult;
+    BMKLocationService *_locService;
+    NSArray *_menuItems;
+    int _num;
+}
+@property (retain,nonatomic) CustomTableView *tableView;
+@property (assign,nonatomic) CLLocationCoordinate2D coord;
+@property (retain,nonatomic) NSMutableArray *arrayY;
+
+-(void)createMapViewWithFram:(CGRect)frame;
+@property (retain, nonatomic)  BMKMapView *mapView;
+
+@end
+
+@implementation MapVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self addBarButtonItem];
+    _arrayPost = [NSMutableArray array];
+    [self createMapViewWithFram:CGRectMake(0, 64, kWidth, kHeight)];
+    [self startDingWei];
+    NSDictionary *dict = @{NSFontAttributeName:[UIFont fontWithName:@"Verdana" size:25],NSForegroundColorAttributeName:[UIColor whiteColor]};
+    self.navigationController.navigationBar.titleTextAttributes = dict;
+    self.navigationController.navigationBar.tintColor = [UIColor whiteColor];
+    self.navigationController.navigationBar.barTintColor = [UIColor colorWithRed:239.0f/255.0f green:71.0f/255.0f blue:58.0f/255.0f alpha:1];
+    _mapView.showMapScaleBar = true;
+    _mapView.mapScaleBarPosition = CGPointMake(kLuKuangTraillingSpace*2+kLuKuangWidth,kHeight-94);
+    
+    
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+-(void)viewWillAppear:(BOOL)animated
+{
+    [_mapView viewWillAppear];
+    self.mapView.delegate = self;
+    _locService.delegate = self;
+    self.navigationController.navigationBar.translucent = YES;
+
+}
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [_mapView viewWillDisappear];
+    _mapView.delegate = nil;
+    _locService.delegate = nil;
+}
+
+-(void)addBarButtonItem
+{
+    UIBarButtonItem *item1 = [[UIBarButtonItem alloc] initWithTitle:nil style:UIBarButtonItemStylePlain target:self action:nil];
+    UIBarButtonItem *item2 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil];
+    UIButton *btn = [Helpers createLuKuangButtonWithFrame:CGRectMake(0, 0, 70, 30) ImageName:nil Target:self Action:@selector(showMenu:) Title:@"选择型号"];
+    UIBarButtonItem *item3 = [[UIBarButtonItem alloc] initWithCustomView:btn];
+    UIBarButtonItem *item4 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil];
+    UIBarButtonItem *item5 = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"u65"] style:UIBarButtonItemStylePlain target:self action:@selector(lieBiaoAct)];
+    self.navigationItem.rightBarButtonItems = @[item5,item4,item3,item2,item1];
+    
+    UIBarButtonItem *itemLeft = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemStop target:self action:@selector(backAct)];
+    self.navigationItem.leftBarButtonItem = itemLeft;
+}
+-(void)backAct
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+- (void)showMenu:(UIButton *)sender
+{
+    [self.navigationController pushViewController:[[OilTypeVC alloc] init] animated:YES];
+}
+#if 0
+- (void)showMenu:(UIButton *)sender
+{
+    _menuItems =
+    @[
+      
+      [KxMenuItem menuItem:@"所有型号"
+                     image:nil
+                    target:nil
+                    action:NULL],
+      
+      [KxMenuItem menuItem:@"93＃（京92）"
+                     image:[UIImage imageNamed:@"u22-2"]
+                    target:self
+                    action:@selector(pushMenuItem:)],
+      
+      [KxMenuItem menuItem:@"97＃（京95）"
+                     image:[UIImage imageNamed:@"u22-2"]
+                    target:self
+                    action:@selector(pushMenuItem:)],
+      
+      [KxMenuItem menuItem:@"0号柴油"
+                     image:[UIImage imageNamed:@"u22-2"]
+                    target:self
+                    action:@selector(pushMenuItem:)],
+      ];
+    
+    KxMenuItem *first = _menuItems[0];
+    first.image = nil;
+    first.foreColor = [UIColor colorWithRed:47/255.0f green:112/255.0f blue:225/255.0f alpha:1.0];
+    first.alignment = NSTextAlignmentCenter;
+    
+    [KxMenu showMenuInView:self.view
+                  fromRect:CGRectMake(5*kWidth/8, -35, 100, 100)
+                 menuItems:_menuItems];
+}
+#endif
+- (void) pushMenuItem:(id)sender
+{
+    KxMenuItem *item = sender;
+    item.selected = !item.selected;
+    [item updateItem];
+    [KxMenu showMenuInView:self.view
+                  fromRect:CGRectMake(5*kWidth/8, -35, 100, 100)
+                 menuItems:_menuItems];
+    
+}
+-(void)lieBiaoAct
+{
+    ListVC *vc = [[ListVC alloc] init];
+    vc.title = @"⛽️加油站列表";
+    vc.arrayResult = _arrayPost;
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+-(void)createMapViewWithFram:(CGRect)frame
+{
+    _mapView = [[BMKMapView alloc] initWithFrame:frame];
+    _mapView.delegate = self;
+    _mapView.zoomLevel = 19;
+    _mapView.rotation = 90;
+    //设置地图显示风格
+    [_mapView setMapType:BMKMapTypeStandard];
+    [self.view addSubview:_mapView];
+    
+    _mapView.compassPosition = CGPointMake(40, _mapView.frame.size.height-200);
+    
+    
+    _mapView.overlooking = -30;
+    _mapView.showMapScaleBar = true;
+    //自定义比例尺的位置
+    _mapView.mapScaleBarPosition = CGPointMake(kLuKuangTraillingSpace*2+kLuKuangWidth, _mapView.frame.size.height);
+    TopDownBtn *btnLuKuang = [Helpers createLocationButtonWithFrame:CGRectMake(kWidth-60, 84, 50, 50) ImageName1:@"btn_lbs_map_road_traffic_info_off" ImageName2:@"btn_lbs_map_road_traffic_info_press" Target:self Action:@selector(pressLuKuangAct:) Title:@"路况"];
+    [self.view addSubview:btnLuKuang];
+    UIButton *btnBig = [Helpers createLocationButtonWithFrame:CGRectMake(kWidth-50, kHeight-110, 40, 50) ImageName1:@"btn_lbs_map_zoomin" ImageName2:@"btn_lbs_map_zoomin_press" Target:self Action:@selector(fangDa:) Title:nil];
+    btnBig.tag = 100;
+    [self.view addSubview:btnBig];
+    UIButton *btnSmall = [Helpers createLocationButtonWithFrame:CGRectMake(kWidth-50, kHeight-60, 40, 50) ImageName1:@"btn_lbs_map_zoomout" ImageName2:@"btn_lbs_map_zoomout_press" Target:self Action:@selector(suoXiao:) Title:nil];
+    btnSmall.tag = 101;
+    [self.view addSubview:btnSmall];
+    UIButton *btnLocation = [Helpers createLocationButtonWithFrame:CGRectMake(10, kHeight-60, 50, 50) ImageName1:@"btn_lbs_map_head_up" ImageName2:@"btn_lbs_map_head_up_press" Target:self Action:@selector(dingWei:) Title:nil];
+    btnLocation.tag = 102;
+    [self.view addSubview:btnLocation];
+    
+    self.arrayY = [NSMutableArray arrayWithObjects:[NSNumber numberWithFloat:CGRectGetMinY(btnBig.frame)],[NSNumber numberWithFloat:CGRectGetMinY(btnSmall.frame)],[NSNumber numberWithFloat:CGRectGetMinY(btnLocation.frame)], nil];
+}
+static int LocationMode = 0;
+-(void)dingWei:(UIButton *)btn
+{
+    LocationMode ++;
+    LocationMode==4?LocationMode=0:LocationMode;
+    [_locService startUserLocationService];
+    _mapView.showsUserLocation = YES;
+    _mapView.zoomLevel = 17;
+    switch (LocationMode) {
+        case 0:
+            _mapView.userTrackingMode = BMKUserTrackingModeNone;
+            [btn setBackgroundImage:[UIImage imageNamed:@"btn_lbs_map_north_up"] forState:UIControlStateNormal];
+            [btn setBackgroundImage:[UIImage imageNamed:@"btn_lbs_map_north_up_press"] forState:UIControlStateHighlighted];
+            break;
+        case 1:
+            _mapView.userTrackingMode = BMKUserTrackingModeFollow;
+            [btn setBackgroundImage:[UIImage imageNamed:@"btn_lbs_map_head_up"] forState:UIControlStateNormal];
+            [btn setBackgroundImage:[UIImage imageNamed:@"btn_lbs_map_head_up_press"] forState:UIControlStateHighlighted];
+            break;
+        case 2:
+            _mapView.userTrackingMode = BMKUserTrackingModeFollowWithHeading;
+            [btn setBackgroundImage:[UIImage imageNamed:@"btn_lbs_map_north_up"] forState:UIControlStateNormal];
+            [btn setBackgroundImage:[UIImage imageNamed:@"btn_lbs_map_north_up_press"] forState:UIControlStateHighlighted];
+            break;
+        case 3:
+            [_locService stopUserLocationService];
+            break;
+            
+        default:
+            break;
+    }
+    
+}
+//BMKUserTrackingModeNone = 0,             /// 普通定位模式
+//BMKUserTrackingModeFollow,               /// 定位跟随模式
+//BMKUserTrackingModeFollowWithHeading,    /// 定位罗盘模式
+
+static BOOL LuisOK = NO;
+-(void)pressLuKuangAct:(UIButton *)btn
+{
+    UILabel *label = [[UILabel alloc] init];
+    label.backgroundColor = [UIColor grayColor];
+    label.frame = CGRectMake(0, 0, 150, 30);
+    label.textColor = [UIColor whiteColor];
+    label.textAlignment = NSTextAlignmentCenter;
+    label.center = self.view.center;;
+    [UIView beginAnimations:nil context:nil];
+    [UIView setAnimationDuration:3];
+    [UIView setAnimationDelegate:self];
+    label.alpha = 0;
+    if (LuisOK)
+    {
+        [btn setBackgroundImage:[UIImage imageNamed:@"btn_lbs_map_road_traffic_info_off"] forState:UIControlStateNormal];
+        label.text = @"实时路况已关闭";
+        [_mapView setTrafficEnabled:NO];
+        
+    }
+    if (!LuisOK)
+    {
+        [btn setBackgroundImage:[UIImage imageNamed:@"btn_lbs_map_road_traffic_info_on"] forState:UIControlStateNormal];
+        label.text = @"实时路况已打开";
+        [_mapView setTrafficEnabled:YES];
+    }
+    [UIView commitAnimations];
+    LuisOK = !LuisOK;
+    [self.view addSubview:label];
+    
+}
+
+-(void)fangDa:(UIButton *)btn
+{
+    
+    if (_mapView.zoomLevel<19) {
+        _mapView.zoomLevel++;
+    }
+    
+}
+
+-(void)suoXiao:(UIButton *)btn
+{
+    if (_mapView.zoomLevel>=3) {
+        _mapView.zoomLevel--;
+    }
+    
+}
+
+-(void)startDingWei
+{
+    _locService = [[BMKLocationService alloc] init];
+    _mapView.zoomLevel = 15;
+    [_locService startUserLocationService];
+    _mapView.showsUserLocation = YES;
+    _mapView.userTrackingMode = BMKUserTrackingModeFollow;
+    _mapView.showsUserLocation = YES;
+    
+}
+-(void)startPoiSearch
+{
+    _poisearch = [[BMKPoiSearch alloc] init];
+    _poisearch.delegate = self;
+    BMKNearbySearchOption *option = [[BMKNearbySearchOption alloc]init];
+    option.pageCapacity = 10;
+    option.keyword = @"加油站";
+    option.radius = 10000;
+    option.location =self.coord;
+    BOOL flag = [_poisearch poiSearchNearBy:option];
+    NSLog(@"%@",flag?@"成功":@"失败");
+}
+/**
+ *在地图View将要启动定位时，会调用此函数
+ *@param mapView 地图View
+ */
+- (void)willStartLocatingUser
+{
+    NSLog(@"start locate");
+    
+}
+
+/**
+ *用户方向更新后，会调用此函数
+ *@param userLocation 新的用户位置
+ */
+- (void)didUpdateUserHeading:(BMKUserLocation *)userLocation
+{
+    [_mapView updateLocationData:userLocation];
+    // NSLog(@"heading is %@",userLocation.heading);
+}
+
+/**
+ *用户位置更新后，会调用此函数
+ *@param userLocation 新的用户位置
+ */
+- (void)didUpdateBMKUserLocation:(BMKUserLocation *)userLocation
+{
+    [_mapView updateLocationData:userLocation];
+    self.coord = userLocation.location.coordinate;
+    if (!_poisearch) {
+         NSLog(@"jicile");
+        [self startPoiSearch];
+    }
+}
+
+/**
+ *在地图View停止定位后，会调用此函数
+ *@param mapView 地图View
+ */
+- (void)didStopLocatingUser
+{
+    
+}
+
+/**
+ *定位失败后，会调用此函数
+ *@param mapView 地图View
+ *@param error 错误号，参考CLError.h中定义的错误号
+ */
+- (void)didFailToLocateUserWithError:(NSError *)error
+{
+    NSLog(@"location error");
+}
+
+
+- (void)dealloc {
+    if (_mapView) {
+        _mapView = nil;
+    }
+}
+
+
+-(void)onGetPoiResult:(BMKPoiSearch *)searcher result:(BMKPoiResult *)poiResult errorCode:(BMKSearchErrorCode)errorCode
+{
+    [_arrayPost removeAllObjects];
+    NSLog(@"%d",errorCode);
+    if (errorCode == BMK_SEARCH_NO_ERROR)
+    {
+        for (BMKPoiInfo *info in poiResult.poiInfoList) {
+            NSString * distance=[NSString stringWithFormat:@"%.1f",BMKMetersBetweenMapPoints(BMKMapPointForCoordinate(self.coord), BMKMapPointForCoordinate(info.pt))/1000];
+            NSNumber *number1 = [NSNumber numberWithDouble:info.pt.longitude];
+            NSNumber *number2 = [NSNumber numberWithDouble:info.pt.latitude];
+            NSDictionary *dic = @{
+                                  @"longitude":[number1 stringValue] ,
+                                  @"latitude" :[number2 stringValue],
+                                  @"stationName":[NSString stringWithFormat:@"%@",info.name],
+                                  @"distance":distance,
+                                  @"address":info.address
+                                  };
+            [_arrayPost addObject:dic];
+        }
+        AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
+        manager.responseSerializer = [AFJSONResponseSerializer serializer];
+        manager.requestSerializer=[AFJSONRequestSerializer serializer];
+        [manager POST:SZFilterNearByOilStation parameters:@{@"body":@{@"raws":_arrayPost}} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            _arrayResult = [[responseObject objectForKey:@"body"] objectForKey:@"results"];
+            NSLog(@"_arrayResult: %@", _arrayResult);
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error){
+            NSLog(@"Error: %@", error);
+        }];
+        
+        for (int i = 0 ; i < poiResult.poiInfoList.count; i++)
+        {
+            BMKPoiDetailResult* dResult = poiResult.poiInfoList[i] ;
+            CustomPointAnnotation* anno = [[CustomPointAnnotation alloc] init] ;
+            anno.coordinate = dResult.pt ;
+            anno.title = dResult.name ;
+            anno.grade = nil;
+            [_mapView addAnnotation:anno] ;
+        }
+
+    }
+}
+
+static int textNum = 0;
+-(BMKAnnotationView *)mapView:(BMKMapView *)mapView viewForAnnotation:(id<BMKAnnotation>)annotation
+{
+    NSArray *arrayPic = @[@"pic_icon_marka",@"pic_icon_markb",@"pic_icon_markc",@"pic_icon_markd",@"pic_icon_marke",@"pic_icon_markf",@"pic_icon_markg",@"pic_icon_markh",@"pic_icon_marki",@"pic_icon_markj"];
+    NSString *strAnno = @"dfgdsg";
+    if ([annotation isKindOfClass:[CustomPointAnnotation class]])
+    {
+        CustomPointAnnotation *anno = (CustomPointAnnotation *)annotation;
+        BMKAnnotationView *annotationView = (BMKAnnotationView *)[mapView dequeueReusableAnnotationViewWithIdentifier:strAnno];
+        if (!annotationView) {
+            annotationView = [[BMKAnnotationView alloc] initWithAnnotation:anno reuseIdentifier:strAnno];
+            annotationView.image = [UIImage imageNamed:arrayPic[textNum%10]];
+        }
+        textNum ++;
+        return annotationView;
+    }
+    return nil;
+}
+
+
+
+-(void)createTableView
+{
+    self.tableView = [[CustomTableView alloc] initWithFrame:CGRectMake(0, kHeight-150, kWidth, 150) style:UITableViewStylePlain];
+    self.tableView.dataSource = self;
+    self.tableView.delegate = self;
+    self.tableView.scrollEnabled = NO;
+    [self.view addSubview:self.tableView];
+    self.tableView.hidden = YES;
+    
+}
+
+-(void)mapView:(BMKMapView *)mapView didSelectAnnotationView:(BMKAnnotationView *)view
+{
+    if (!self.tableView) {
+        [self createTableView];
+    }
+    [_locService stopUserLocationService];
+    [mapView setCenterCoordinate:[view.annotation coordinate] animated:YES];
+    NSString *strTitle = [view.annotation title];
+    for (int i=0; i<_arrayPost.count; i++) {
+        PostModel *info = [PostModel objectWithKeyValues:_arrayPost[i]];
+        if ([strTitle isEqualToString:info.stationName]) {
+            _num = i;
+        }
+    }
+    NSArray *arrayPic = @[@"pic_icon_focus_marka",@"pic_icon_focus_markb",@"pic_icon_focus_markc",@"pic_icon_focus_markd",@"pic_icon_focus_marke",@"pic_icon_focus_markf",@"pic_icon_focus_markg",@"pic_icon_focus_markh",@"pic_icon_focus_marki",@"pic_icon_focus_markj"];
+    
+    view.image = [UIImage imageNamed:arrayPic[_num]];
+    [self.tableView reloadData];
+    self.tableView.hidden = NO;
+    for (int i=100; i<103; i++) {
+        UIButton *btn = (UIButton *)[self.view viewWithTag:i];
+        CGFloat y = [self.arrayY[i-100] floatValue];
+        btn.frame = CGRectMake(btn.frame.origin.x, y-150 , btn.frame.size.width, btn.frame.size.height);
+    }
+    _mapView.mapScaleBarPosition = CGPointMake(kLuKuangTraillingSpace*2+kLuKuangWidth,kHeight-94-150);
+}
+-(void)mapView:(BMKMapView *)mapView didDeselectAnnotationView:(BMKAnnotationView *)view
+{
+    NSArray *arrayPic = @[@"pic_icon_marka",@"pic_icon_markb",@"pic_icon_markc",@"pic_icon_markd",@"pic_icon_marke",@"pic_icon_markf",@"pic_icon_markg",@"pic_icon_markh",@"pic_icon_marki",@"pic_icon_markj"];
+    view.image = [UIImage imageNamed:arrayPic[_num]];
+    [self downTap:nil];
+    
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 2;
+}
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.row == 0) {
+        return 110;
+    }
+    return 40;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewCell *cell;
+    PostModel *info = [PostModel objectWithKeyValues:_arrayPost[_num]];
+    if (indexPath.row == 0) {
+        CustomCell *cell = [[[NSBundle mainBundle] loadNibNamed:@"CustomCell" owner:self options:nil] lastObject];
+        cell.userInteractionEnabled = NO;
+        cell.name.text = info.stationName;
+        cell.juLiLabel.text = [NSString stringWithFormat:@"%@公里",info.distance];
+        cell.dizhiLabel.text = info.address;
+        cell.dizhiLabel.textColor = [UIColor grayColor];
+        cell.gasPrice = [[CustomLabel alloc] initWithFrame:CGRectMake(10, 70, 100, 30)];
+        [cell.contentView addSubview:cell.gasPrice];
+        [cell.gasPrice setCustomLabelWithLeftString:@"93#" RightString:@"$7.00"];
+        return cell;
+    }
+    cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:nil];
+    UIButton *btn1 = [Helpers createLuKuangButtonWithFrame:CGRectMake(0, 0, kWidth/2-20, 40) ImageName:nil Target:self Action:@selector(deteilAct:) Title:@"详情"];
+    UIButton *btn2 = [Helpers createLuKuangButtonWithFrame:CGRectMake(kWidth/2+20, 0, kWidth/2-20, 40) ImageName:nil Target:self Action:@selector(daoHangAct:) Title:@"导航"];
+    [cell.contentView addSubview:btn1];
+    [cell.contentView addSubview:btn2];
+    UIButton *btnDown = [Helpers createLuKuangButtonWithFrame:CGRectMake(kWidth/2-20, 0, 40, 40) ImageName:@"u215" Target:self Action:@selector(downTap:) Title:nil];
+    [cell.contentView addSubview:btnDown];
+    return cell;
+}
+#if 1
+- (void)daoHangAct:(id)sender {
+    PostModel *info = [PostModel objectWithKeyValues:_arrayPost[_num]];
+    //节点数组
+    NSMutableArray *nodesArray = [[NSMutableArray alloc]    initWithCapacity:2];
+    
+    //起点
+    BNRoutePlanNode *startNode = [[BNRoutePlanNode alloc] init];
+    startNode.pos = [[BNPosition alloc] init];
+    startNode.pos.x = self.coord.longitude;
+    startNode.pos.y = self.coord.latitude;
+    startNode.pos.eType = BNCoordinate_BaiduMapSDK;
+    [nodesArray addObject:startNode];
+    
+    //终点
+    BNRoutePlanNode *endNode = [[BNRoutePlanNode alloc] init];
+    endNode.pos = [[BNPosition alloc] init];
+    endNode.pos.x = [info.longitude floatValue] ;
+    endNode.pos.y = [info.latitude floatValue];
+    endNode.pos.eType = BNCoordinate_BaiduMapSDK;
+    [nodesArray addObject:endNode];
+    //发起路径规划
+    [BNCoreServices_RoutePlan startNaviRoutePlan:BNRoutePlanMode_Recommend naviNodes:nodesArray time:nil delegete:self userInfo:nil];
+    
+}
+//算路成功回调
+-(void)routePlanDidFinished:(NSDictionary *)userInfo
+{
+    NSLog(@"算路成功");
+    
+    //路径规划成功，开始导航
+    [BNCoreServices_UI showNaviUI: BN_NaviTypeReal delegete:self isNeedLandscape:YES];
+}
+#endif
+
+- (void)deteilAct:(id)sender {
+}
+
+-(void)downTap:(UIButton *)btn
+{
+    self.tableView.hidden = YES;
+    for (int i=100; i<103; i++) {
+        UIButton *btn = (UIButton *)[self.view viewWithTag:i];
+        CGFloat y = [self.arrayY[i-100] floatValue];
+        btn.frame = CGRectMake(btn.frame.origin.x, y , btn.frame.size.width, btn.frame.size.height);
+    }
+    _mapView.mapScaleBarPosition = CGPointMake(kLuKuangTraillingSpace*2+kLuKuangWidth,kHeight-94);
+    
+}
+@end
+

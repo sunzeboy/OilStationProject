@@ -1,0 +1,52 @@
+package cn.sh.changxing.ct.mobile.dialog.lbs;
+
+import com.ionicframework.cnpcmobile317812.R;
+import android.app.Dialog;
+import android.content.Context;
+import android.widget.TextView;
+
+/**
+ * 
+ * @ClassName: DialogLoading
+ * @Description: Dialog等待对话框
+ * @author zengchao
+ * @date 2015年3月15日 下午5:13:58
+ * 
+ */
+public class DialogLoading extends Dialog {
+	private TextView mMessage;
+
+	public DialogLoading(Context context, int msgId) {
+		super(context, R.style.LbsLoadDialog);
+		setContentView(R.layout.dialog_play_error);
+		initView(msgId);
+		setCancelable(true);
+		setCanceledOnTouchOutside(false);
+	}
+
+	public DialogLoading(Context context) {
+		super(context, R.style.LbsLoadDialog);
+		setContentView(R.layout.dialog_play_error);
+		initView();
+		setCancelable(true);
+		setCanceledOnTouchOutside(false);
+	}
+
+	private void initView() {
+		mMessage = (TextView) findViewById(R.id.dialog_loading_message);
+	}
+
+	private void initView(int messageId) {
+		mMessage = (TextView) findViewById(R.id.dialog_loading_message);
+		mMessage.setText(messageId);
+	}
+
+	public void setMessage(String message) {
+		mMessage.setText(message);
+	}
+
+	public void setMessage(int id) {
+		mMessage.setText(id);
+	}
+
+}

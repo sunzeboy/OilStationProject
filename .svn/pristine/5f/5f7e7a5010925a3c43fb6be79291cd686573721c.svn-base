@@ -1,0 +1,40 @@
+package cn.sh.changxing.ct.mobile.comm;
+
+/**
+ * <b>Function Name：</b>IOperViewLayer<br>
+ * <b>History：</b>2015/4/3 wangjianqing create<br>
+ * <br>
+ *
+ * @author SIS wangjianqing
+ * @version 1.0.0 2015/4/3
+ */
+public interface IOperViewLayer
+{
+	/**
+	 * initialize components
+	 */
+	public void initComponent();
+	
+	/**
+	 * check whether the operator view layer is invisible or not
+	 * 
+	 * @return true  : invisible
+	 *         false : visible
+	 */
+	public boolean isHiding();
+	
+	/**
+	 * make the operator view layer visible
+	 */
+	public void appearSelf();
+
+	/**
+	 * make the operator view layer invisible
+	 */
+	public void hideSelf();
+	
+	/**
+	 * dispose the operator view layer invisible
+	 */
+	public void dispose();
+}

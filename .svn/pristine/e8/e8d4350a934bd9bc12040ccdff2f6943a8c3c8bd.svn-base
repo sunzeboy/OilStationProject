@@ -1,0 +1,217 @@
+package cn.sh.changxing.ct.mobile.bdmap.adapter.entity;
+
+import java.io.Serializable;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+//import cn.sh.changxing.ct.mobile.db.entity.DestHistoryEntity;
+//import cn.sh.changxing.ct.mobile.db.entity.FavoriteAddrEntity;
+
+import com.baidu.mapapi.map.MapPoi;
+import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.search.core.PoiInfo;
+
+/**
+ * <b>Function Name：</b>PoiInfoEx class<br>
+ * <b>History：</b>2015/4/24 wangjianqing create<br>
+ * <br>
+ *
+ * @author SIS wangjianqing
+ * @version 1.0.0 2015/4/24
+ */
+public class PoiInfoEx extends PoiInfo implements Serializable, Parcelable
+{	
+	private static final long serialVersionUID = -9020094335304932919L;
+
+	public enum PoiInfoExType
+	{
+		POI_INFO_TYPE_NORMAL,
+		POI_INFO_TYPE_PRELIMINARY_OF_GEO,
+		POI_INFO_TYPE_PRELIMINARY_OF_MAP_POI,
+		POI_INFO_TYPE_FAVORITED,
+		POI_INFO_TYPE_DEST_HISTORY
+	}
+	
+	private PoiInfoExType mPoiInfoExType;
+	
+    private static String delBackslash(String poiname){
+    	String result = poiname.replaceAll("\\\\", "");
+    	return result;
+    }
+	
+	public static PoiInfoEx createNormalPoiInfoEx(PoiInfo poiInfo)
+	{
+		PoiInfoEx poiInfoEx = new PoiInfoEx(poiInfo);
+		return poiInfoEx;
+	}
+	
+	public static PoiInfoEx createPrePoiInfoExOfGeo(LatLng latlng)
+	{
+		PoiInfoEx poiInfoEx = new PoiInfoEx(PoiInfoExType.POI_INFO_TYPE_PRELIMINARY_OF_GEO);
+		poiInfoEx.name = "地图上的点";
+		poiInfoEx.type = POITYPE.POINT;
+		poiInfoEx.location = latlng;
+		return poiInfoEx;
+	}
+	
+	public static PoiInfoEx createPrePoiInfoExOfMapPoi(MapPoi mapPoi)
+	{
+		PoiInfoEx poiInfoEx = new PoiInfoEx(PoiInfoExType.POI_INFO_TYPE_PRELIMINARY_OF_MAP_POI);
+		poiInfoEx.name = delBackslash(mapPoi.getName());
+		poiInfoEx.type = POITYPE.POINT;
+		poiInfoEx.location = mapPoi.getPosition();
+		
+		return poiInfoEx;
+	}
+	
+	public PoiInfoEx(PoiInfo poiInfo)
+	{
+		setPoiInfoExType(PoiInfoExType.POI_INFO_TYPE_NORMAL);
+		this.address = poiInfo.address;
+		this.city = poiInfo.city;
+		this.hasCaterDetails = poiInfo.hasCaterDetails;
+		this.isPano = poiInfo.isPano;
+		this.location = poiInfo.location;
+		this.name = poiInfo.name;
+		this.phoneNum = poiInfo.phoneNum;
+		this.postCode = poiInfo.postCode;
+		this.type = poiInfo.type;
+		this.uid = poiInfo.uid;
+	}
+	/**
+     * 地址簿对象入参构造函数。<br>
+     * 
+     * @param favoriteAddr
+     *            收藏地址簿对象
+     */
+//    public PoiInfoEx(FavoriteAddrEntity favoriteAddr)
+//    {
+//        setPoiInfoExType(PoiInfoExType.POI_INFO_TYPE_FAVORITED);
+//        this.name = favoriteAddr.getPoiName();
+//        this.address = favoriteAddr.getAddr();
+//        this.phoneNum = favoriteAddr.getTelephone();
+//        this.type = POITYPE.POINT;
+//        this.location=new LatLng(favoriteAddr.getLatitude(), favoriteAddr.getLongitude());
+//    }
+    
+    /**
+     * 导航历史记录对象入参构造函数。<br>
+     * 
+     * @param destHistory
+     *            导航历史记录对象
+     */
+//    public PoiInfoEx(DestHistoryEntity destHistory)
+//    {
+//    	setPoiInfoExType(PoiInfoExType.POI_INFO_TYPE_DEST_HISTORY);
+//        this.name = destHistory.getDestName();
+//        this.address = destHistory.getDestAddr();
+//        this.location=new LatLng(destHistory.getLatitude(), destHistory.getLongitude());
+//        this.type = POITYPE.POINT;
+//    }
+	public PoiInfoEx(PoiInfoExType poiInfoType)
+	{
+		setPoiInfoExType(poiInfoType);
+	}
+	
+	public void setPoiInfoExType(PoiInfoExType poiInfoType)
+	{
+		mPoiInfoExType = poiInfoType;
+	}
+	
+	public PoiInfoExType getPoiInfoType()
+	{
+		return mPoiInfoExType;
+	}
+	
+	//////////////////////////////// for implementing Parcelable interface ////////////////////////////////
+
+	@Override
+	public int describeContents()
+	{
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags)
+	{
+		// poi名称
+		dest.writeString(name);
+		// poi id 如果为isPano为true，可用此参数 调用街景组件PanoramaService类的requestPanoramaWithPoiUId方法检索街景数据
+		dest.writeString(uid);
+		// poi地址信息
+		dest.writeString(address);
+		// poi所在城市
+		dest.writeString(city);
+		// poi电话信息
+		dest.writeString(phoneNum);
+		// poi邮编
+		dest.writeString(postCode);
+		// poi类型，0：普通点，1：公交站，2：公交线路，3：地铁站，4：地铁线路,
+		dest.writeInt(type.getInt());
+		// poi坐标, 当ePoiType为2或4时，pt 为空
+		if ((type != POITYPE.BUS_LINE) && (type != POITYPE.SUBWAY_LINE))
+		{
+			dest.writeDouble(location.latitude);
+			dest.writeDouble(location.longitude);
+		}
+		 
+		boolean[] val = new boolean[2];
+		// poi点是否有美食类详情页面
+		val[0] = hasCaterDetails;
+		// poi点附近是否有街景，可使用uid检索全景组件的全景数据
+		val[1] = isPano;
+		dest.writeBooleanArray(val);
+	}
+	
+	public static final Parcelable.Creator<PoiInfoEx> CREATOR = new Parcelable.Creator<PoiInfoEx>()
+	{
+		public PoiInfoEx createFromParcel(Parcel in)
+		{
+		    return new PoiInfoEx(in);
+		}
+		
+		public PoiInfoEx[] newArray(int size)
+		{
+		    return new PoiInfoEx[size];
+		}
+	};
+	
+	public PoiInfoEx(Parcel in)
+	{
+		// poi名称
+		name = in.readString();
+		// poi id 如果为isPano为true，可用此参数 调用街景组件PanoramaService类的requestPanoramaWithPoiUId方法检索街景数据
+		uid = in.readString();
+		// poi地址信息
+		address = in.readString();
+		// poi所在城市
+		city = in.readString();
+		// poi电话信息
+		phoneNum = in.readString();
+		// poi邮编
+		postCode = in.readString();
+		// poi类型，0：普通点，1：公交站，2：公交线路，3：地铁站，4：地铁线路,
+		type = POITYPE.fromInt(in.readInt());
+		// poi坐标, 当ePoiType为2或4时，pt 为空
+		if ((type != POITYPE.BUS_LINE) && (type != POITYPE.SUBWAY_LINE))
+		{
+			double latitude = in.readDouble();
+			double longitude = in.readDouble();
+			location = new LatLng(latitude, longitude);
+		}
+		else
+		{
+			location = null;
+		}
+		 
+		boolean[] val = new boolean[2];
+		in.readBooleanArray(val);
+		// poi点是否有美食类详情页面
+		hasCaterDetails = val[0];
+		// poi点附近是否有街景，可使用uid检索全景组件的全景数据
+		isPano = val[1];
+	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////////////
+}

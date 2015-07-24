@@ -1,0 +1,13 @@
+//
+//  ListVC.h
+//  GasStationAPP
+//
+//  Created by sunze on 15/6/17.
+//  Copyright (c) 2015年 sunze. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface ListVC : UITableViewController
+@property (retain,nonatomic) NSArray *arrayResult;
+@end

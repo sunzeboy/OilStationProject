@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">cnpc-mobile</string>
+    <string name="launcher_name">@string/app_name</string>
+    <string name="activity_name">@string/launcher_name</string>
+    <string name="title_activity_lbs">LbsActivity</string>
+    <string name="action_settings">Settings</string>
+    <string name="lbs_road_traffic_info">路况</string>
+    <string name="lbs_msg_map_launch_navigator_failed_because_of_locating_not_finished">本设备正在定位中，无法启动导航！</string>
+    <string name="lbs_offline_map_loading_tip">加载中请等待...</string>
+    <string name="down_to_refresh_pull_label">下拉加载上一页</string>
+    <string name="up_to_refresh_pull_label">上拉加载下一页</string>
+    <string name="pull_to_refresh_release_label">松开后刷新</string>
+    <string name="pull_to_refresh_refreshing_label">正在加载...</string>
+    <string name="title_activity_navigator">NavigatorActivity</string>
+    <string name="title_activity_lis">加油站</string>
+    <string name="lbs_title_oli_type">92#</string>
+    <string name="lbs_settings_oli_type_92">92#</string>
+    <string name="lbs_settings_oli_type_95">95#</string>
+    <string name="lbs_settings_oli_type_0">0#</string>
+    <string name="lbs_settings_oli_type_gasoline">汽油</string>
+    <string name="lbs_settings_oli_type_diesel">柴油</string>
+    <string name="lbs_settings_oli_type">我关注的油号</string>
+    <string name="lbs_settings_oli_type_prompt">请选择关注的油号</string>
+    <string name="lbs_map_result_list_name">加油站名称</string>
+    <string name="lbs_map_result_list_address">加油站地址</string>
+    <string name="lbs_settings_oli_type_prompt_value">6.28</string>
+    <string name="lbs_navigation">导航</string>
+    <string name="lbs_details">详情</string>
+    <string name="lbs_kilometre">公里</string>
+    <string name="lbs_search_filling_station_china_petroleum">加油站</string>
+</resources>
